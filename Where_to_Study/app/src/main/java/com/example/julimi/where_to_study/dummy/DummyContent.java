@@ -22,8 +22,8 @@ import java.io.File;
 import android.os.Environment;
 import 	java.io.FileOutputStream;
 import 	java.io.OutputStreamWriter;
-
 import android.content.Context;
+
 /**
  * Helper class for providing sample content for user interfaces created by
  * Android template wizards.
@@ -49,13 +49,16 @@ public class DummyContent {
      */
     public static void writeToFile(String data,String filename)
     {
+
+
         // Get the directory for the user's public pictures directory.
         final File path =
                 Environment.getExternalStoragePublicDirectory
                         (
                                 //Environment.DIRECTORY_PICTURES
-                                Environment.DIRECTORY_DCIM + "/buildings/"
+                                /*Environment.DIRECTORY_DCIM +*/ "/buildings/"
                         );
+
 
         // Make sure the path directory exists.
         if(!path.exists())
@@ -70,6 +73,8 @@ public class DummyContent {
 
         try
         {
+
+
             file.createNewFile();
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
@@ -79,6 +84,7 @@ public class DummyContent {
 
             fOut.flush();
             fOut.close();
+
         }
         catch (IOException e)
         {
@@ -136,25 +142,44 @@ public class DummyContent {
         protected String doInBackground(String... params) {
             try {
                 String GET_URL;
-                for (int i = 1000; i < 1100; i++) {
+                String content="{\"data\":[";;
+                int idx = 0;
+                for (int i = 2000; i < 2066; i++) {
                     GET_URL = GET_URL_PRE + Integer.toString(i) + GET_URL_POST;
 
 
                     DummyContent.sendGet(GET_URL);
                     if (Len != 0) {
                         System.out.println(i);
-                        writeToFile("{\"data\":[{","MC.txt");
-                        writeToFile("\"subject\":","MC.txt");
+                        content = content+ "{\"subject\":\"";
+                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("subject");
+                        content += "\",\"catalog_number\":\"";
+                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("catalog_number");
+                        content = content+ "\",\"weekdays\":\"";
+                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("weekdays");
+                        content = content+ "\",\"start_time\":\"";
+                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("start_time");
+                        content += "\"";
+                        content = content+ ",\"end_time\":\"";
+                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("end_time");
+                        content += "\"";
+                        content = content+ ",\"room\":\"";
+                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("room");
+                        content = content+ "\"},";
+                        ++idx;
                         //write
                     }
                 }
+                writeToFile(content,"MC.txt");
                 System.out.println("1111111111111");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.err.println("Fail to do sendGet() in background");
 
+            } catch (JSONException e) {
+                e.printStackTrace();
+                System.err.println("Fail to write!");
             }
-
             return responseStrBuilder.toString();
         }
     }
