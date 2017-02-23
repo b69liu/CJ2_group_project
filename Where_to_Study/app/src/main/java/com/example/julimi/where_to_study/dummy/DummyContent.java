@@ -9,11 +9,13 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.net.URL;
@@ -96,10 +98,43 @@ public class DummyContent {
     private static final String GET_URL_PRE = "https://api.uwaterloo.ca/v2/buildings/MC/";
     private static final String GET_URL_POST = "/courses.json?key=2d5402f20d57e1dd104101f9fa7dae27";
     private static final String USER_AGENT = "Marshmallow/6.0";
+    private static final String GET_FILE = "MC.txt";
+
     private static int Len = 0;
 
     public static JSONObject jsonObject = new JSONObject();
     public static StringBuilder responseStrBuilder;
+
+
+    public static void fileGet() throws IOException {
+        File local = Environment.getExternalStoragePublicDirectory("/buildings/");
+        File file = new File(local,GET_FILE);
+
+        try {
+            //InputStream in = new BufferedInputStream(file.get);
+            BufferedReader streamReader = new BufferedReader(new FileReader(file));
+            responseStrBuilder = new StringBuilder();
+
+            String inStr;
+            while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
+
+            jsonObject = new JSONObject(responseStrBuilder.toString());
+            Log.d("","JSON value: " + jsonObject.getJSONArray("building").length());
+            //Len = jsonObject.getJSONArray("data").length();
+            Iterator keysToCopyIterator = jsonObject.getJSONArray("building").getJSONObject(0).keys();
+            List<String> keysList = new ArrayList<String>();
+            while(keysToCopyIterator.hasNext()) {
+                String key = (String) keysToCopyIterator.next();
+                keysList.add(key);
+                System.out.println(key);
+            }
+            //in.close();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.err.println("Fail to convert to JSONObject by File!");
+        }
+    }
 
     public static void sendGet(String GET_URL) throws IOException {
         URL obj = new URL(GET_URL);
@@ -142,17 +177,21 @@ public class DummyContent {
         protected String doInBackground(String... params) {
             try {
                 String GET_URL;
-                String content="{\"data\":[";;
+                String content="{\"data\":[";
                 int idx = 0;
-                for (int i = 2000; i < 2066; i++) {
+                boolean first_line = true;
+                for (int i = 2034; i < 2066; i++) {
                     GET_URL = GET_URL_PRE + Integer.toString(i) + GET_URL_POST;
 
 
                     DummyContent.sendGet(GET_URL);
-                    if (Len != 0) {
+                    while (idx < Len) {
                         System.out.println(i);
+                        if(!first_line) content += ",";
+                        first_line = false;
                         content = content+ "{\"subject\":\"";
                         content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("subject");
+                        //jsonObject.getJSONArray().
                         content += "\",\"catalog_number\":\"";
                         content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("catalog_number");
                         content = content+ "\",\"weekdays\":\"";
@@ -165,13 +204,16 @@ public class DummyContent {
                         content += "\"";
                         content = content+ ",\"room\":\"";
                         content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("room");
-                        content = content+ "\"},";
+                        content = content+ "\"}";
                         ++idx;
                         //write
                     }
+                    idx = 0;
                 }
+                content += "]}";
                 writeToFile(content,"MC.txt");
                 System.out.println("1111111111111");
+                fileGet();
             } catch (IOException e) {
                 e.printStackTrace();
                 System.err.println("Fail to do sendGet() in background");
