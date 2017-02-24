@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -94,21 +95,44 @@ public class DummyContent {
         }
     }
 
-    private static final int COUNT = 25;
+    private static int COUNT = 0;
     private static final String GET_URL_PRE = "https://api.uwaterloo.ca/v2/buildings/MC/";
     private static final String GET_URL_POST = "/courses.json?key=2d5402f20d57e1dd104101f9fa7dae27";
     private static final String USER_AGENT = "Marshmallow/6.0";
     private static final String GET_FILE = "MC.txt";
-
+    private static String[] DoW = {
+            "",
+            "",
+            "M",
+            "T",
+            "W",
+            "Th",
+            "F"
+    };
     private static int Len = 0;
 
     public static JSONObject jsonObject = new JSONObject();
     public static StringBuilder responseStrBuilder;
 
+    private static boolean helpToGetFile(String today, String cday) {
+        // M,W,F
+        for (int i = 0; i < cday.length(); i++) {
+            if (today.length() == 1) {
+                if (today.charAt(0) == cday.charAt(i) && cday.charAt(i+1) != 'h') return true;
+            } else {
+                if (cday.charAt(i) == 'h') return true;
 
+            }
+        }
+        return false;
+    }
     public static void fileGet() throws IOException {
         File local = Environment.getExternalStoragePublicDirectory("/buildings/");
         File file = new File(local,GET_FILE);
+
+        Calendar c = Calendar.getInstance();
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        System.out.println("Today: " + dayOfWeek);
 
         try {
             //InputStream in = new BufferedInputStream(file.get);
@@ -119,9 +143,16 @@ public class DummyContent {
             while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
 
             jsonObject = new JSONObject(responseStrBuilder.toString());
-            Log.d("","JSON value: " + jsonObject.getJSONArray("building").length());
-            //Len = jsonObject.getJSONArray("data").length();
-            Iterator keysToCopyIterator = jsonObject.getJSONArray("building").getJSONObject(0).keys();
+             Log.d("","JSON value: " + jsonObject.getJSONObject("building").getJSONObject("MC").length());
+            COUNT = jsonObject.getJSONObject("building").getJSONObject("MC").length();
+
+            //for (int i = 0; i < jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length(); i++) {
+            //    if (helpToGetFile(DoW[dayOfWeek], jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("weekdays")))
+            //        System.out.println("Today: " + DoW[dayOfWeek] + " " + jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("start_time"));
+            //}
+
+            System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length());
+            Iterator keysToCopyIterator = jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(0).keys();
             List<String> keysList = new ArrayList<String>();
             while(keysToCopyIterator.hasNext()) {
                 String key = (String) keysToCopyIterator.next();
@@ -159,7 +190,7 @@ public class DummyContent {
             while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
 
             jsonObject = new JSONObject(responseStrBuilder.toString());
-           // Log.d("","JSON value: " + jsonObject.getJSONArray("data").length());
+            // Log.d("","JSON value: " + jsonObject.getJSONArray("data").length());
             Len = jsonObject.getJSONArray("data").length();
             in.close();
 
@@ -177,14 +208,22 @@ public class DummyContent {
         protected String doInBackground(String... params) {
             try {
                 String GET_URL;
-                String content="{\"data\":[";
+                String content="{\"building\":{\"MC\":{";
                 int idx = 0;
-                boolean first_line = true;
-                for (int i = 2034; i < 2066; i++) {
+
+                boolean firstclass = true;
+                //int noc = 0;
+                for (int i = 2034; i < 2060; i++) {
+
                     GET_URL = GET_URL_PRE + Integer.toString(i) + GET_URL_POST;
 
-
+                    boolean first_line = true;
                     DummyContent.sendGet(GET_URL);
+                    if (Len == 0) continue;
+
+                    if(!firstclass) content += ",";
+                    firstclass = false;
+                    content += "\""+i+"\":[";
                     while (idx < Len) {
                         System.out.println(i);
                         if(!first_line) content += ",";
@@ -209,11 +248,12 @@ public class DummyContent {
                         //write
                     }
                     idx = 0;
+                    content += "]";
                 }
-                content += "]}";
+                content += "}}}";
                 writeToFile(content,"MC.txt");
                 System.out.println("1111111111111");
-                fileGet();
+
             } catch (IOException e) {
                 e.printStackTrace();
                 System.err.println("Fail to do sendGet() in background");
@@ -230,33 +270,25 @@ public class DummyContent {
         new BackgroundTask().execute();
     }
 
-    public static int loopForFloor(JSONObject object, int floorLevel) {
-        int count = 0;
-        try {
-            JSONArray got = object.getJSONArray("data");
-            //int count = 0;
-            for(int i = 0; i < got.length(); i++) {
-                if (got.getJSONObject(i).getString("floor") == Integer.toString(floorLevel)) {
-                    count++;
-                }
-            }
 
-
-        }catch (JSONException e) {
-            e.printStackTrace();
-            System.err.println("Fail to count!");
-        }
-
-        return count;
-
-    }
 
     static {
         getResponse();
         // Add some sample items.
-        for (int i = 1; i <= COUNT; i++) {
-            addItem(createDummyItem(i));
+        try {
+            fileGet();
+            Iterator it = jsonObject.getJSONObject("building").getJSONObject("MC").keys();
+
+            for (int i = 1; i <= COUNT && it.hasNext(); i++) {
+                String key = (String) it.next();
+                addItem(createDummyItem(i, key));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
     }
 
     private static void addItem(DummyItem item) {
@@ -264,18 +296,18 @@ public class DummyContent {
         ITEM_MAP.put(item.id, item);
     }
 
-    private static DummyItem createDummyItem(int position) {
-        return new DummyItem(String.valueOf(position), "Item " + position, makeDetails(position));
+    private static DummyItem createDummyItem(int position, String item) {
+        return new DummyItem(String.valueOf(position), "MC" + item, "");
     }
 
-    private static String makeDetails(int position) {
+    /*private static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
         builder.append("Details about Item: ").append(position);
         for (int i = 0; i < position; i++) {
             builder.append("\nMore details information here.");
         }
         return builder.toString();
-    }
+    }*/
 
     /**
      * A dummy item representing a piece of content.
