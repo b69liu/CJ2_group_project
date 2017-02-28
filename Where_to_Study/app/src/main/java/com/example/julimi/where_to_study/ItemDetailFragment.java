@@ -49,7 +49,8 @@ public class ItemDetailFragment extends Fragment {
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.content);
+                String nTitle = mItem.content.substring(0,9);
+                appBarLayout.setTitle(nTitle);
             }
         }
     }

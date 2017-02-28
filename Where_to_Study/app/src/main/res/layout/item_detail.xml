@@ -785,7 +785,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/textView61"
+                android:id="@+id/textView60"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/cell_shape"
@@ -794,7 +794,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
             <TextView
-                android:id="@+id/textView62"
+                android:id="@+id/textView61"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/cell_shape"

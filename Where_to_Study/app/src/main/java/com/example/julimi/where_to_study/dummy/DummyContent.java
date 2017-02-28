@@ -13,11 +13,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.net.URL;
 import java.net.HttpURLConnection;
@@ -25,6 +30,8 @@ import java.io.File;
 import android.os.Environment;
 import 	java.io.FileOutputStream;
 import 	java.io.OutputStreamWriter;
+import java.util.concurrent.TimeUnit;
+
 import android.content.Context;
 
 /**
@@ -50,6 +57,8 @@ public class DummyContent {
      * @param data: the string to output
      * @param filename: file name
      */
+
+
     public static void writeToFile(String data,String filename)
     {
 
@@ -94,7 +103,6 @@ public class DummyContent {
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }
-
     private static int COUNT = 0;
     private static final String GET_URL_PRE = "https://api.uwaterloo.ca/v2/buildings/MC/";
     private static final String GET_URL_POST = "/courses.json?key=2d5402f20d57e1dd104101f9fa7dae27";
@@ -110,6 +118,7 @@ public class DummyContent {
             "F"
     };
     private static int Len = 0;
+    private static String[] output;
 
     public static JSONObject jsonObject = new JSONObject();
     public static StringBuilder responseStrBuilder;
@@ -118,7 +127,17 @@ public class DummyContent {
         // M,W,F
         for (int i = 0; i < cday.length(); i++) {
             if (today.length() == 1) {
-                if (today.charAt(0) == cday.charAt(i) && cday.charAt(i+1) != 'h') return true;
+                char t1 = today.charAt(0);
+                char t2 = cday.charAt(i);
+                boolean b1 = t1 == t2;
+                boolean b2 = true;
+                if (i+1 < cday.length()) {
+                    char t3 = cday.charAt(i + 1);
+
+                    b2 = t3 != 'h';
+                }
+                if (b1 && b2) return true;
+
             } else {
                 if (cday.charAt(i) == 'h') return true;
 
@@ -126,13 +145,72 @@ public class DummyContent {
         }
         return false;
     }
+
+    public static String filterByDay(JSONArray oj, int noc) {
+
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CANADA);
+        Date curdate = new Date();
+        String curTime = format.format(curdate).toString();
+        curTime = "10:38";          //test
+        System.out.println(curTime);
+        boolean stt = true;
+        String Min = "23:59";
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        //dayOfWeek = 1;          // test
+        if (dayOfWeek == 1 || dayOfWeek == 7) return "            available all day";
+
+
+        String dw = DoW[dayOfWeek];
+        long difference = 0;
+
+        try {
+            Date min = format.parse(Min);
+            curdate = format.parse(curTime);
+            Date thedate = new Date();
+
+            for (int i = 0; i < noc; i++) {
+                boolean b4 = helpToGetFile(dw, oj.getJSONObject(i).getString("weekdays"));
+                if (!b4) continue;
+                thedate = format.parse(oj.getJSONObject(i).getString("start_time"));
+                if(thedate.after(curdate)&&thedate.before(min)) {
+                    stt = true;
+                    min = thedate;
+                }
+                thedate = format.parse(oj.getJSONObject(i).getString("end_time"));
+                if(thedate.after(curdate)&&thedate.before(min)) {
+                    stt = false;
+                    min = thedate;
+                }
+
+            }
+            String test = format.format(min).toString();
+            boolean b5 = test.equals(Min);
+            if (b5) {
+
+                return "            free until tomorrow";
+            }
+            difference = min.getTime() - curdate.getTime();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if (stt) return "            available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
+        else return "            unavailable";
+        // show today's class
+        //for (int i = 0; i < jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length(); i++) {
+        //    if (helpToGetFile(DoW[dayOfWeek], jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("weekdays")))
+        //        System.out.println("Today: " + DoW[dayOfWeek] + " " + jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("start_time"));
+        //}
+    }
+
     public static void fileGet() throws IOException {
         File local = Environment.getExternalStoragePublicDirectory("/buildings/");
         File file = new File(local,GET_FILE);
 
-        Calendar c = Calendar.getInstance();
-        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
-        System.out.println("Today: " + dayOfWeek);
+
 
         try {
             //InputStream in = new BufferedInputStream(file.get);
@@ -145,11 +223,6 @@ public class DummyContent {
             jsonObject = new JSONObject(responseStrBuilder.toString());
              Log.d("","JSON value: " + jsonObject.getJSONObject("building").getJSONObject("MC").length());
             COUNT = jsonObject.getJSONObject("building").getJSONObject("MC").length();
-
-            //for (int i = 0; i < jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length(); i++) {
-            //    if (helpToGetFile(DoW[dayOfWeek], jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("weekdays")))
-            //        System.out.println("Today: " + DoW[dayOfWeek] + " " + jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("start_time"));
-            //}
 
             System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length());
             Iterator keysToCopyIterator = jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(0).keys();
@@ -213,8 +286,12 @@ public class DummyContent {
 
                 boolean firstclass = true;
                 //int noc = 0;
-                for (int i = 2034; i < 2060; i++) {
+                for (int i = 1056; i < 4065; i++) {
 
+                    if (i == 1099 || i == 2099 || i == 3099) {
+                        i += 900;
+                        continue;
+                    }
                     GET_URL = GET_URL_PRE + Integer.toString(i) + GET_URL_POST;
 
                     boolean first_line = true;
@@ -277,10 +354,17 @@ public class DummyContent {
         // Add some sample items.
         try {
             fileGet();
+            System.out.println("33333");
+            //String hehe = filterByDay(jsonObject, "2035");
+            System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").length());
             Iterator it = jsonObject.getJSONObject("building").getJSONObject("MC").keys();
 
             for (int i = 1; i <= COUNT && it.hasNext(); i++) {
                 String key = (String) it.next();
+                System.out.println("Paracmeter: " + COUNT);
+
+                String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key).length());
+                key += nkey;
                 addItem(createDummyItem(i, key));
             }
         } catch (IOException e) {
@@ -297,6 +381,7 @@ public class DummyContent {
     }
 
     private static DummyItem createDummyItem(int position, String item) {
+
         return new DummyItem(String.valueOf(position), "MC" + item, "");
     }
 
