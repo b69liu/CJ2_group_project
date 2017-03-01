@@ -58,6 +58,7 @@ public class DummyContent {
      * @param filename: file name
      */
 
+    //public static String[] inDetail = new String[30];
 
     public static void writeToFile(String data,String filename)
     {
@@ -118,7 +119,7 @@ public class DummyContent {
             "F"
     };
     private static int Len = 0;
-    private static String[] output;
+    //private static String[] output;
 
     public static JSONObject jsonObject = new JSONObject();
     public static StringBuilder responseStrBuilder;
@@ -146,13 +147,14 @@ public class DummyContent {
         return false;
     }
 
-    public static String filterByDay(JSONArray oj, int noc) {
+
+    public static String filterByDay(JSONArray oj, int noc, String[] inDetail) {
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CANADA);
         Date curdate = new Date();
         String curTime = format.format(curdate).toString();
-        curTime = "10:38";          //test
+        //curTime = "10:38";          //test
         System.out.println(curTime);
         boolean stt = true;
         String Min = "23:59";
@@ -163,6 +165,7 @@ public class DummyContent {
 
         String dw = DoW[dayOfWeek];
         long difference = 0;
+        for (int i = 0; i < 30; i++) inDetail[i] = "";
 
         try {
             Date min = format.parse(Min);
@@ -172,6 +175,27 @@ public class DummyContent {
             for (int i = 0; i < noc; i++) {
                 boolean b4 = helpToGetFile(dw, oj.getJSONObject(i).getString("weekdays"));
                 if (!b4) continue;
+
+                // store schedule
+                String st = oj.getJSONObject(i).getString("start_time");
+                String et = oj.getJSONObject(i).getString("end_time");
+                String fix = "8:30";
+                Date dfix = format.parse(fix);
+                Date dst = format.parse(st);
+                Date det = format.parse(et);
+                long deltaD = dst.getTime() - dfix.getTime();
+                int timeSlotIndex1 = ((int) TimeUnit.MILLISECONDS.toMinutes(deltaD)) / 30;
+                deltaD = det.getTime() - dfix.getTime();
+                int timeSlotIndex2 = ((int) TimeUnit.MILLISECONDS.toMinutes(deltaD)) / 30;
+                int doTSI = timeSlotIndex2 - timeSlotIndex1;
+
+                for (int k = 1; k < doTSI; k++) {
+                    inDetail[k+timeSlotIndex1] = "paint";
+                }
+                inDetail[timeSlotIndex1] = oj.getJSONObject(i).getString("subject") + oj.getJSONObject(i).getString("catalog_number");
+                inDetail[timeSlotIndex2] = st + " - " + et;
+
+
                 thedate = format.parse(oj.getJSONObject(i).getString("start_time"));
                 if(thedate.after(curdate)&&thedate.before(min)) {
                     stt = true;
@@ -198,7 +222,11 @@ public class DummyContent {
             e.printStackTrace();
         }
         if (stt) return "            available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
-        else return "            unavailable";
+        else {
+            //String oo = "            unavailable";
+
+            return "            unavailable";
+        }
         // show today's class
         //for (int i = 0; i < jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length(); i++) {
         //    if (helpToGetFile(DoW[dayOfWeek], jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("weekdays")))
@@ -350,7 +378,7 @@ public class DummyContent {
 
 
     static {
-        getResponse();
+        //getResponse();
         // Add some sample items.
         try {
             fileGet();
@@ -359,13 +387,16 @@ public class DummyContent {
             System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").length());
             Iterator it = jsonObject.getJSONObject("building").getJSONObject("MC").keys();
 
+
             for (int i = 1; i <= COUNT && it.hasNext(); i++) {
                 String key = (String) it.next();
                 System.out.println("Paracmeter: " + COUNT);
 
-                String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key).length());
+                String[] inDetail = new String[30];
+                String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key).length(), inDetail);
                 key += nkey;
-                addItem(createDummyItem(i, key));
+                Log.d("","inDetail[0]: " + inDetail[0]);
+                addItem(createDummyItem(i, key, inDetail));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -380,9 +411,9 @@ public class DummyContent {
         ITEM_MAP.put(item.id, item);
     }
 
-    private static DummyItem createDummyItem(int position, String item) {
+    private static DummyItem createDummyItem(int position, String item, String[] detail) {
 
-        return new DummyItem(String.valueOf(position), "MC" + item, "");
+        return new DummyItem(String.valueOf(position), "MC" + item, detail);
     }
 
     /*private static String makeDetails(int position) {
@@ -400,9 +431,10 @@ public class DummyContent {
     public static class DummyItem {
         public final String id;
         public final String content;
-        public final String details;
+        public final String[] details;
 
-        public DummyItem(String id, String content, String details) {
+
+        public DummyItem(String id, String content, String[] details) {
             this.id = id;
             this.content = content;
             this.details = details;

@@ -1,6 +1,7 @@
 package com.example.julimi.where_to_study;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -28,6 +29,39 @@ public class ItemDetailFragment extends Fragment {
      * The dummy content this fragment is presenting.
      */
     private DummyContent.DummyItem mItem;
+
+    private int[] idForBlank = {
+            R.id.textView2,
+            R.id.textView4,
+            R.id.textView6,
+            R.id.textView8,
+            R.id.textView10,
+            R.id.textView12,
+            R.id.textView14,
+            R.id.textView16,
+            R.id.textView18,
+            R.id.textView20,
+            R.id.textView22,
+            R.id.textView24,
+            R.id.textView26,
+            R.id.textView28,
+            R.id.textView30,
+            R.id.textView32,
+            R.id.textView34,
+            R.id.textView36,
+            R.id.textView38,
+            R.id.textView40,
+            R.id.textView42,
+            R.id.textView44,
+            R.id.textView46,
+            R.id.textView48,
+            R.id.textView50,
+            R.id.textView52,
+            R.id.textView54,
+            R.id.textView56,
+            R.id.textView58,
+            R.id.textView60,
+    };
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -65,6 +99,23 @@ public class ItemDetailFragment extends Fragment {
            // ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.details);
         //}
 
+        //mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+        String[] det = mItem.details;
+        boolean versionOfBackground = true;
+        for (int i = 0; i < 30; i++) {
+            if (det[i] != "") {
+                if (versionOfBackground) ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape1);
+                else ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape2);
+            }
+            if (det[i] != "" && det[i] != "paint") {
+                ((TextView) rootView.findViewById(idForBlank[i])).setText(det[i]);
+                if (det[i].length() >= 11) versionOfBackground = !versionOfBackground;
+            }
+                //((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource();
+
+
+        }
+        //((TextView) rootView.findViewById(R.id.textView2)).setText("ijidjs");
         return rootView;
     }
 }

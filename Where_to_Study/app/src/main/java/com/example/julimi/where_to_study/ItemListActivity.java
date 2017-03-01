@@ -2,6 +2,7 @@ package com.example.julimi.where_to_study;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -90,7 +91,13 @@ public class ItemListActivity extends AppCompatActivity {
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
             //holder.mIdView.setText(mValues.get(position).id);
+
             holder.mContentView.setText(mValues.get(position).content);
+            if (mValues.get(position).content.length() <= 32) {
+                holder.mContentView.setTextColor(Color.RED);
+            } else {
+                holder.mContentView.setTextColor(Color.parseColor("#228B22"));
+            }
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
