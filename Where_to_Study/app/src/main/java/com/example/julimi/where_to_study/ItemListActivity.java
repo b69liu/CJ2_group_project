@@ -3,6 +3,7 @@ package com.example.julimi.where_to_study;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,7 @@ public class ItemListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +51,13 @@ public class ItemListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                Snackbar.make(view, "Start synchronizing", Snackbar.LENGTH_LONG).show();
+                //finish();
+                DummyContent.getResponse(view);
+                //if (DummyContent.isDownload) ;
+
+                //startActivity(getIntent());
             }
         });
 
@@ -82,6 +89,7 @@ public class ItemListActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            //contextT = parent.getContext();
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_list_content, parent, false);
             return new ViewHolder(view);

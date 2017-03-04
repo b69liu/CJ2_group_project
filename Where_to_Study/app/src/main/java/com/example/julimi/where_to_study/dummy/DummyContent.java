@@ -1,6 +1,8 @@
 package com.example.julimi.where_to_study.dummy;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -33,6 +35,7 @@ import 	java.io.OutputStreamWriter;
 import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
+import android.view.View;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -52,13 +55,7 @@ public class DummyContent {
      */
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
 
-    /**
-     * write string to a file
-     * @param data: the string to output
-     * @param filename: file name
-     */
-
-    //public static String[] inDetail = new String[30];
+    public static boolean isDownload = false;
 
     public static void writeToFile(String data,String filename)
     {
@@ -160,12 +157,13 @@ public class DummyContent {
         String Min = "23:59";
         int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
         //dayOfWeek = 1;          // test
+        for (int i = 0; i < 30; i++) inDetail[i] = "";
         if (dayOfWeek == 1 || dayOfWeek == 7) return "            available all day";
 
 
         String dw = DoW[dayOfWeek];
         long difference = 0;
-        for (int i = 0; i < 30; i++) inDetail[i] = "";
+
 
         try {
             Date min = format.parse(Min);
@@ -305,12 +303,20 @@ public class DummyContent {
 
     private static class BackgroundTask extends AsyncTask<String,Void,String> {
 
+        View view;
+
+
+
+        public BackgroundTask(View view) {
+            this.view = view;
+        }
         @Override
         protected String doInBackground(String... params) {
             try {
                 String GET_URL;
                 String content="{\"building\":{\"MC\":{";
                 int idx = 0;
+                //int ct = 0;
 
                 boolean firstclass = true;
                 //int noc = 0;
@@ -355,8 +361,10 @@ public class DummyContent {
                     idx = 0;
                     content += "]";
                 }
+
                 content += "}}}";
                 writeToFile(content,"MC.txt");
+
                 System.out.println("1111111111111");
 
             } catch (IOException e) {
@@ -369,16 +377,23 @@ public class DummyContent {
             }
             return responseStrBuilder.toString();
         }
+
+        @Override
+        protected void onPostExecute(String s) {
+            Snackbar.make(view, "Synchronizing Completed", Snackbar.LENGTH_LONG).show();
+        }
+
     }
 
-    public static void getResponse() {
-        new BackgroundTask().execute();
+    public static void getResponse(View view) {
+        new BackgroundTask(view).execute();
     }
 
 
 
     static {
-        //getResponse();
+        //if (isDownload) getResponse();
+        //isDownload = false;
         // Add some sample items.
         try {
             fileGet();
