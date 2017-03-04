@@ -156,7 +156,7 @@ public class DummyContent {
         boolean stt = true;
         String Min = "23:59";
         int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
-        //dayOfWeek = 1;          // test
+        //dayOfWeek = 3;          // test
         for (int i = 0; i < 30; i++) inDetail[i] = "";
         if (dayOfWeek == 1 || dayOfWeek == 7) return "            available all day";
 
@@ -380,7 +380,7 @@ public class DummyContent {
 
         @Override
         protected void onPostExecute(String s) {
-            Snackbar.make(view, "Synchronizing Completed", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(view, "Synchronization Completed! Please Swipe and Refresh", Snackbar.LENGTH_LONG).show();
         }
 
     }
@@ -390,27 +390,26 @@ public class DummyContent {
     }
 
 
-
-    static {
-        //if (isDownload) getResponse();
-        //isDownload = false;
-        // Add some sample items.
+    public static void helpToLoad() {
         try {
             fileGet();
-            System.out.println("33333");
+            //System.out.println("33333");
             //String hehe = filterByDay(jsonObject, "2035");
-            System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").length());
+            ITEMS.clear();
+            ITEM_MAP.clear();
+
+            //System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").length());
             Iterator it = jsonObject.getJSONObject("building").getJSONObject("MC").keys();
 
 
             for (int i = 1; i <= COUNT && it.hasNext(); i++) {
                 String key = (String) it.next();
-                System.out.println("Paracmeter: " + COUNT);
+                //System.out.println("Paracmeter: " + COUNT);
 
                 String[] inDetail = new String[30];
                 String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key).length(), inDetail);
                 key += nkey;
-                Log.d("","inDetail[0]: " + inDetail[0]);
+                //Log.d("","inDetail[0]: " + inDetail[0]);
                 addItem(createDummyItem(i, key, inDetail));
             }
         } catch (IOException e) {
@@ -418,6 +417,14 @@ public class DummyContent {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    static {
+
+        //if (isDownload) getResponse();
+        //isDownload = false;
+        // Add some sample items.
+        helpToLoad();
 
     }
 
