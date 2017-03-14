@@ -36,6 +36,11 @@ import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Toast;
+
+import com.example.julimi.where_to_study.ItemListActivity;
+
+import static java.lang.Math.abs;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -54,6 +59,51 @@ public class DummyContent {
      * A map of sample (dummy) items, by ID.
      */
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
+
+    public static final Map<String, Map<String, DummyItem> > Buildings = new HashMap<String, Map<String, DummyItem> >();
+
+    public static final String fakebuildinglist[] = {
+            "AHS",
+            "AL",
+            "ARC",
+            "B1",
+            "B2",
+            "BMH",
+            "C2",
+            "CGR",
+            "CPH",
+            "DC",
+            "DMS",
+            "DWE",
+            "E2",
+            "E3",
+            "E5",
+            "E6",
+            "EC4",
+            "ECH",
+            "EIT",
+            "ESC",
+            "EV1",
+            "EV2",
+            "EV3",
+            "HH",
+            "IHB",
+            "M3",
+            "MC",
+            "ML",
+            "OPT",
+            "PAC",
+            "PAS",
+            "PHR",
+            "PHY",
+            "QNC",
+            "RCH",
+            "REN",
+            "SJ1",
+            "SJ2",
+            "STC",
+            "STP"};
+
 
     public static boolean isDownload = false;
 
@@ -102,10 +152,12 @@ public class DummyContent {
         }
     }
     private static int COUNT = 0;
-    private static final String GET_URL_PRE = "https://api.uwaterloo.ca/v2/buildings/MC/";
+    private static final String GET_URL_PRE = "https://api.uwaterloo.ca/v2/buildings/";
+    public static String GET_BUILDING = "RCH";
+    private static final String GET_SLASH = "/";
     private static final String GET_URL_POST = "/courses.json?key=2d5402f20d57e1dd104101f9fa7dae27";
     private static final String USER_AGENT = "Marshmallow/6.0";
-    private static final String GET_FILE = "MC.txt";
+    private static String GET_FILE = "";
     private static String[] DoW = {
             "",
             "",
@@ -115,6 +167,11 @@ public class DummyContent {
             "Th",
             "F"
     };
+
+    public static void setBuilding(String name) {
+        GET_BUILDING = name;
+        GET_FILE = name + ".txt";
+    }
     private static int Len = 0;
     //private static String[] output;
 
@@ -157,7 +214,7 @@ public class DummyContent {
         String Min = "23:59";
         int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
         //dayOfWeek = 3;          // test
-        for (int i = 0; i < 30; i++) inDetail[i] = "";
+        for (int i = 0; i < 31; i++) inDetail[i] = "";
         if (dayOfWeek == 1 || dayOfWeek == 7) return "            available all day";
 
 
@@ -166,27 +223,35 @@ public class DummyContent {
 
 
         try {
+            System.out.println("Enter !!!");
             Date min = format.parse(Min);
             curdate = format.parse(curTime);
             Date thedate = new Date();
 
             for (int i = 0; i < noc; i++) {
                 boolean b4 = helpToGetFile(dw, oj.getJSONObject(i).getString("weekdays"));
+                System.out.println(i);
                 if (!b4) continue;
+
 
                 // store schedule
                 String st = oj.getJSONObject(i).getString("start_time");
                 String et = oj.getJSONObject(i).getString("end_time");
-                String fix = "8:30";
+                System.out.println("shit !");
+                String fix = "8:00";
                 Date dfix = format.parse(fix);
                 Date dst = format.parse(st);
                 Date det = format.parse(et);
+                System.out.println("shit !!");
                 long deltaD = dst.getTime() - dfix.getTime();
                 int timeSlotIndex1 = ((int) TimeUnit.MILLISECONDS.toMinutes(deltaD)) / 30;
+                System.out.println("deltaD: " + deltaD);
+                System.out.println("shit !!!");
                 deltaD = det.getTime() - dfix.getTime();
                 int timeSlotIndex2 = ((int) TimeUnit.MILLISECONDS.toMinutes(deltaD)) / 30;
                 int doTSI = timeSlotIndex2 - timeSlotIndex1;
 
+                System.out.println("shit !!!!");
                 for (int k = 1; k < doTSI; k++) {
                     inDetail[k+timeSlotIndex1] = "paint";
                 }
@@ -207,6 +272,7 @@ public class DummyContent {
 
             }
             String test = format.format(min).toString();
+            System.out.println("Out !!!!");
             boolean b5 = test.equals(Min);
             if (b5) {
 
@@ -236,6 +302,7 @@ public class DummyContent {
         File local = Environment.getExternalStoragePublicDirectory("/buildings/");
         File file = new File(local,GET_FILE);
 
+        System.out.println(GET_FILE);
 
 
         try {
@@ -247,17 +314,17 @@ public class DummyContent {
             while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
 
             jsonObject = new JSONObject(responseStrBuilder.toString());
-             Log.d("","JSON value: " + jsonObject.getJSONObject("building").getJSONObject("MC").length());
-            COUNT = jsonObject.getJSONObject("building").getJSONObject("MC").length();
+            // Log.d("","JSON value: " + jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).length());
+            COUNT = jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).length();
 
-            System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length());
-            Iterator keysToCopyIterator = jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(0).keys();
-            List<String> keysList = new ArrayList<String>();
-            while(keysToCopyIterator.hasNext()) {
-                String key = (String) keysToCopyIterator.next();
-                keysList.add(key);
-                System.out.println(key);
-            }
+            //System.out.println(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray("2034").length());
+            //Iterator keysToCopyIterator = jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray("2034").getJSONObject(0).keys();
+            //List<String> keysList = new ArrayList<String>();
+            //while(keysToCopyIterator.hasNext()) {
+            //    String key = (String) keysToCopyIterator.next();
+            //    keysList.add(key);
+            //    System.out.println(key);
+            //}
             //in.close();
 
         } catch (JSONException e) {
@@ -266,6 +333,46 @@ public class DummyContent {
         }
     }
 
+    public static String[] roomGet(String building) throws IOException {
+
+        String [] rit = null;
+        String url = "http://54.88.214.21/rooms.php/" + building;
+        URL obj = new URL(url);
+        HttpURLConnection urlConnection = (HttpURLConnection) obj.openConnection();
+        System.out.println("!!!!!!!");
+
+        urlConnection.setRequestMethod("GET");
+        //urlConnection.setRequestProperty("User_Agent", USER_AGENT);
+        //int response = urlConnection.getResponseCode();
+
+        System.out.println("hahaha");
+        try {
+            urlConnection.connect();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            responseStrBuilder = new StringBuilder();
+
+            String inStr;
+            while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
+
+            JSONArray bArray = new JSONArray(responseStrBuilder.toString());
+
+            rit = new String[bArray.length()];
+            for (int i = 0; i < bArray.length(); i++) {
+                rit[i] =  bArray.getJSONObject(i).getString("room");
+            }
+            // Log.d("","JSON value: " + jsonObject.getJSONArray("data").length());
+            //Len = bObject.getJSONArray("data").length();
+            in.close();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.err.println("Fail to convert to JSONObject!");
+        } finally {
+            urlConnection.disconnect();
+        }
+        return rit;
+    }
     public static void sendGet(String GET_URL) throws IOException {
         URL obj = new URL(GET_URL);
 
@@ -304,39 +411,65 @@ public class DummyContent {
     private static class BackgroundTask extends AsyncTask<String,Void,String> {
 
         View view;
+        ProgressDialog pd;
 
 
-
+        public BackgroundTask() {this.view = null;}
         public BackgroundTask(View view) {
+
             this.view = view;
+            this.pd = new ProgressDialog(view.getContext());
+            this.pd.setCanceledOnTouchOutside(false);
         }
+
+        //@Override
+        protected void onProgressUpdate(Integer... values) {
+            //super.onProgressUpdate(values);
+            //if (values.length == 2) {
+                pd.setProgress(values[0]);
+            //   pd.setMax(values[1]);
+            //}
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pd.setMessage("Downloading...");
+            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pd.show();
+        }
+
         @Override
         protected String doInBackground(String... params) {
             try {
+
+                System.out.println("enter");
+
                 String GET_URL;
-                String content="{\"building\":{\"MC\":{";
+                String []room = roomGet(GET_BUILDING);
+                String content="{\"building\":{\"" + GET_BUILDING + "\":{";
                 int idx = 0;
                 //int ct = 0;
 
+
                 boolean firstclass = true;
                 //int noc = 0;
-                for (int i = 1056; i < 4065; i++) {
+                for (int i = 0; i < room.length; i++) {
 
-                    if (i == 1099 || i == 2099 || i == 3099) {
-                        i += 900;
-                        continue;
-                    }
-                    GET_URL = GET_URL_PRE + Integer.toString(i) + GET_URL_POST;
 
+                    //String RoomNum = Integer.toString(i);
+                    System.out.println(room[i]);
+                    GET_URL = GET_URL_PRE + GET_BUILDING + GET_SLASH + room[i] + GET_URL_POST;
+                    System.out.println(GET_URL);
                     boolean first_line = true;
                     DummyContent.sendGet(GET_URL);
                     if (Len == 0) continue;
 
                     if(!firstclass) content += ",";
                     firstclass = false;
-                    content += "\""+i+"\":[";
+                    content += "\"" + room[i] + "\":[";
                     while (idx < Len) {
-                        System.out.println(i);
+                        //System.out.println(i);
                         if(!first_line) content += ",";
                         first_line = false;
                         content = content+ "{\"subject\":\"";
@@ -360,27 +493,37 @@ public class DummyContent {
                     }
                     idx = 0;
                     content += "]";
+                    onProgressUpdate((int) ((i / (float) room.length) * 100));
                 }
 
                 content += "}}}";
-                writeToFile(content,"MC.txt");
+                writeToFile(content,GET_FILE);
 
                 System.out.println("1111111111111");
 
             } catch (IOException e) {
                 e.printStackTrace();
                 System.err.println("Fail to do sendGet() in background");
+                return "false";
 
             } catch (JSONException e) {
                 e.printStackTrace();
                 System.err.println("Fail to write!");
+                return "false";
             }
-            return responseStrBuilder.toString();
+            //return responseStrBuilder.toString();
+            return "true";
         }
 
         @Override
         protected void onPostExecute(String s) {
-            Snackbar.make(view, "Synchronization Completed! Please Swipe and Refresh", Snackbar.LENGTH_LONG).show();
+            if(view != null) {
+
+                if (pd.isShowing()) pd.dismiss();
+                if (s == "true") Toast.makeText(view.getContext(), "Synchronization Completed", Toast.LENGTH_LONG).show();
+                else Toast.makeText(view.getContext(), "Error", Toast.LENGTH_LONG).show();
+                //Snackbar.make(view, "Synchronization Completed! Please Swipe and Refresh", Snackbar.LENGTH_LONG).show();
+            }
         }
 
     }
@@ -388,10 +531,15 @@ public class DummyContent {
     public static void getResponse(View view) {
         new BackgroundTask(view).execute();
     }
+    public static void getResponseO() {new BackgroundTask().execute();}
 
 
     public static void helpToLoad() {
         try {
+            //getResponseO();
+            //System.out.println("kkk");
+            System.out.println("cao ni ma " + GET_FILE);
+
             fileGet();
             //System.out.println("33333");
             //String hehe = filterByDay(jsonObject, "2035");
@@ -399,16 +547,19 @@ public class DummyContent {
             ITEM_MAP.clear();
 
             //System.out.println(jsonObject.getJSONObject("building").getJSONObject("MC").length());
-            Iterator it = jsonObject.getJSONObject("building").getJSONObject("MC").keys();
+            Iterator it = jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).keys();
 
-
+            // add item
             for (int i = 1; i <= COUNT && it.hasNext(); i++) {
                 String key = (String) it.next();
                 //System.out.println("Paracmeter: " + COUNT);
 
-                String[] inDetail = new String[30];
-                String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray(key).length(), inDetail);
+                System.out.println(key);
+                String[] inDetail = new String[31];
+                System.out.println(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length());
+                String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length(), inDetail);
                 key += nkey;
+                System.out.println(key);
                 //Log.d("","inDetail[0]: " + inDetail[0]);
                 addItem(createDummyItem(i, key, inDetail));
             }
@@ -419,14 +570,14 @@ public class DummyContent {
         }
     }
 
-    static {
+    //static {
 
         //if (isDownload) getResponse();
         //isDownload = false;
         // Add some sample items.
-        helpToLoad();
+    //    helpToLoad();
 
-    }
+    //}
 
     private static void addItem(DummyItem item) {
         ITEMS.add(item);
@@ -435,7 +586,7 @@ public class DummyContent {
 
     private static DummyItem createDummyItem(int position, String item, String[] detail) {
 
-        return new DummyItem(String.valueOf(position), "MC" + item, detail);
+        return new DummyItem(String.valueOf(position), GET_BUILDING + " " + item, detail);
     }
 
     /*private static String makeDetails(int position) {

@@ -31,6 +31,7 @@ public class ItemDetailFragment extends Fragment {
     private DummyContent.DummyItem mItem;
 
     private int[] idForBlank = {
+            R.id.textView0,
             R.id.textView2,
             R.id.textView4,
             R.id.textView6,
@@ -102,7 +103,7 @@ public class ItemDetailFragment extends Fragment {
         //mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
         String[] det = mItem.details;
         boolean versionOfBackground = true;
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 31; i++) {
             if (det[i] != "") {
                 if (versionOfBackground) ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape1);
                 else ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape2);

@@ -20,6 +20,32 @@
         android:stretchColumns="1">
 
         <TableRow
+            android:id="@+id/tableRow0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/cell_shape"
+                android:padding="5dp"
+                android:text="08:00"
+                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
+
+            <TextView
+                android:id="@+id/textView0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/cell_shape"
+                android:padding="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
+
+
+
+        </TableRow>
+        <TableRow
             android:id="@+id/tableRow1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
