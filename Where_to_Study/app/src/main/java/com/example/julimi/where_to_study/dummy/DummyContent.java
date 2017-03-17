@@ -1,6 +1,7 @@
 package com.example.julimi.where_to_study.dummy;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -408,6 +409,7 @@ public class DummyContent {
         }
     }
 
+
     private static class BackgroundTask extends AsyncTask<String,Void,String> {
 
         View view;
@@ -515,12 +517,16 @@ public class DummyContent {
             return "true";
         }
 
+
         @Override
         protected void onPostExecute(String s) {
             if(view != null) {
 
                 if (pd.isShowing()) pd.dismiss();
-                if (s == "true") Toast.makeText(view.getContext(), "Synchronization Completed", Toast.LENGTH_LONG).show();
+                if (s == "true") {
+                    //Toast.makeText(view.getContext(), "Synch Completed!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(view.getContext(), "Synch Completed! Please Swipe and Refresh", Toast.LENGTH_LONG).show();
+                }
                 else Toast.makeText(view.getContext(), "Error", Toast.LENGTH_LONG).show();
                 //Snackbar.make(view, "Synchronization Completed! Please Swipe and Refresh", Snackbar.LENGTH_LONG).show();
             }

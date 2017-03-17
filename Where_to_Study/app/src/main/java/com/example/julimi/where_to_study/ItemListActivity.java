@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import android.view.Gravity;
 
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.SearchView.OnQueryTextListener;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
@@ -83,6 +84,14 @@ public class ItemListActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        DummyContent.ITEMS.clear();
+        DummyContent.ITEM_MAP.clear();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
@@ -107,6 +116,7 @@ public class ItemListActivity extends AppCompatActivity {
         DummyContent.setBuilding(BUILDING_NAME);
         DummyContent.helpToLoad();
         final View recyclerView = findViewById(R.id.item_list);
+
         //DummyContent.getResponse(recyclerView);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
@@ -153,6 +163,7 @@ public class ItemListActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 //Snackbar.make(tm, "Start synchronizing in Background", Snackbar.LENGTH_LONG).show();
+
                                 DummyContent.setBuilding(BUILDING_NAME);
                                 DummyContent.getResponse(tm);
                                 dialog.dismiss();
@@ -193,11 +204,14 @@ public class ItemListActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
+
             navigateUpTo(new Intent(this, MainActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+
     public static String getCurrentSsid(Context context) {
         String ssid = null;
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
