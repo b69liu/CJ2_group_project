@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".BuildingListView"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -24,24 +24,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ItemListActivity"
+            android:name=".RoomListView"
             android:label="@string/title_item_list"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".BuildingListView"
             android:theme="@style/AppTheme.NoActionBar">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.julimi.where_to_study.MainActivity" />
+                android:value="com.example.julimi.where_to_study.BuildingListView" />
 
         </activity>
         <activity
-            android:name=".ItemDetailActivity"
+            android:name=".RoomDetailView"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".ItemListActivity"
+            android:parentActivityName=".RoomListView"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.julimi.where_to_study.ItemListActivity" />
+                android:value="com.example.julimi.where_to_study.RoomListView" />
 
         </activity>
     </application>

@@ -10,7 +10,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -18,19 +17,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.app.SearchManager;
 
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.view.Gravity;
 
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.SearchView.OnQueryTextListener;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,7 +32,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
-import com.example.julimi.where_to_study.dummy.DummyContent;
+import com.example.julimi.where_to_study.dummy.Model;
 
 import java.util.List;
 
@@ -47,11 +40,11 @@ import java.util.List;
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link ItemDetailActivity} representing
+ * lead to a {@link RoomDetailView} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class ItemListActivity extends AppCompatActivity {
+public class RoomListView extends AppCompatActivity {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -87,8 +80,8 @@ public class ItemListActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        DummyContent.ITEMS.clear();
-        DummyContent.ITEM_MAP.clear();
+        Model.ITEMS.clear();
+        Model.ITEM_MAP.clear();
     }
 
     @Override
@@ -113,11 +106,11 @@ public class ItemListActivity extends AppCompatActivity {
         }
 
         System.out.println("BENGKUILE");
-        DummyContent.setBuilding(BUILDING_NAME);
-        DummyContent.helpToLoad();
+        Model.setBuilding(BUILDING_NAME);
+        Model.helpToLoad();
         final View recyclerView = findViewById(R.id.item_list);
 
-        //DummyContent.getResponse(recyclerView);
+        //Model.getResponse(recyclerView);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
 
@@ -132,9 +125,9 @@ public class ItemListActivity extends AppCompatActivity {
                 //System.out.println("HHHHHHAAAAAA");
                 finish();
                 overridePendingTransition(0, 0);
-                DummyContent.setBuilding(BUILDING_NAME);
+                Model.setBuilding(BUILDING_NAME);
                 System.out.println("RI NI MA GOU " + BUILDING_NAME);
-                DummyContent.helpToLoad();
+                Model.helpToLoad();
 
                 assert recyclerView != null;
                 setupRecyclerView((RecyclerView) recyclerView);
@@ -150,7 +143,7 @@ public class ItemListActivity extends AppCompatActivity {
 
                 final View tm = view;
                 //Snackbar.make(view, getCurrentSsid(view.getContext()), Snackbar.LENGTH_LONG).show();
-                AlertDialog alertDialog = new AlertDialog.Builder(ItemListActivity.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(RoomListView.this).create();
                 alertDialog.setTitle("Synchronization");
                 alertDialog.setMessage("Are you sure to update the data of " + BUILDING_NAME + "?\n(WIFI Environment is suggested)");
                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
@@ -164,8 +157,8 @@ public class ItemListActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 //Snackbar.make(tm, "Start synchronizing in Background", Snackbar.LENGTH_LONG).show();
 
-                                DummyContent.setBuilding(BUILDING_NAME);
-                                DummyContent.getResponse(tm);
+                                Model.setBuilding(BUILDING_NAME);
+                                Model.getResponse(tm);
                                 dialog.dismiss();
                             }
                         });
@@ -191,7 +184,7 @@ public class ItemListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Model.ITEMS));
     }
 
     @Override
@@ -205,7 +198,7 @@ public class ItemListActivity extends AppCompatActivity {
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
 
-            navigateUpTo(new Intent(this, MainActivity.class));
+            navigateUpTo(new Intent(this, BuildingListView.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -233,9 +226,9 @@ public class ItemListActivity extends AppCompatActivity {
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<DummyContent.DummyItem> mValues;
+        private final List<Model.DummyItem> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<DummyContent.DummyItem> items) {
+        public SimpleItemRecyclerViewAdapter(List<Model.DummyItem> items) {
             mValues = items;
         }
 
@@ -264,18 +257,18 @@ public class ItemListActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
-                        arguments.putString(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-                        ItemDetailFragment fragment = new ItemDetailFragment();
+                        arguments.putString(RoomDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                        RoomDetailFragment fragment = new RoomDetailFragment();
                         fragment.setArguments(arguments);
                         getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.item_detail_container, fragment)
                                 .commit();
                     } else {
                         Context context = v.getContext();
-                        Intent intent = new Intent(context, ItemDetailActivity.class);
-                        intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                        Intent intent = new Intent(context, RoomDetailView.class);
+                        intent.putExtra(RoomDetailFragment.ARG_ITEM_ID, holder.mItem.id);
 
-                        //DummyContent.getResponse(v);
+                        //Model.getResponse(v);
                         context.startActivity(intent);
                     }
                 }
@@ -291,7 +284,7 @@ public class ItemListActivity extends AppCompatActivity {
             public final View mView;
             public final TextView mIdView;
             public final TextView mContentView;
-            public DummyContent.DummyItem mItem;
+            public Model.DummyItem mItem;
 
             public ViewHolder(View view) {
                 super(view);

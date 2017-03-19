@@ -1,7 +1,6 @@
 package com.example.julimi.where_to_study;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,15 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.julimi.where_to_study.dummy.DummyContent;
+import com.example.julimi.where_to_study.dummy.Model;
 
 /**
  * A fragment representing a single Item detail screen.
- * This fragment is either contained in a {@link ItemListActivity}
- * in two-pane mode (on tablets) or a {@link ItemDetailActivity}
+ * This fragment is either contained in a {@link RoomListView}
+ * in two-pane mode (on tablets) or a {@link RoomDetailView}
  * on handsets.
  */
-public class ItemDetailFragment extends Fragment {
+public class RoomDetailFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -28,7 +27,7 @@ public class ItemDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private Model.DummyItem mItem;
 
     private int[] idForBlank = {
             R.id.textView0,
@@ -68,7 +67,7 @@ public class ItemDetailFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemDetailFragment() {
+    public RoomDetailFragment() {
     }
 
     @Override
@@ -79,7 +78,7 @@ public class ItemDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mItem = Model.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
 
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
@@ -100,21 +99,25 @@ public class ItemDetailFragment extends Fragment {
            // ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.details);
         //}
 
-        //mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-        String[] det = mItem.details;
-        boolean versionOfBackground = true;
-        for (int i = 0; i < 31; i++) {
-            if (det[i] != "") {
-                if (versionOfBackground) ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape1);
-                else ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape2);
-            }
-            if (det[i] != "" && det[i] != "paint") {
-                ((TextView) rootView.findViewById(idForBlank[i])).setText(det[i]);
-                if (det[i].length() >= 11) versionOfBackground = !versionOfBackground;
-            }
+        //mItem = Model.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+        if (mItem != null) {
+            String[] det = mItem.details;
+            boolean versionOfBackground = true;
+            for (int i = 0; i < 31; i++) {
+                if (det[i] != "") {
+                    if (versionOfBackground)
+                        ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape1);
+                    else
+                        ((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource(R.drawable.cell_shape2);
+                }
+                if (det[i] != "" && det[i] != "paint") {
+                    ((TextView) rootView.findViewById(idForBlank[i])).setText(det[i]);
+                    if (det[i].length() >= 11) versionOfBackground = !versionOfBackground;
+                }
                 //((TextView) rootView.findViewById(idForBlank[i])).setBackgroundResource();
 
 
+            }
         }
         //((TextView) rootView.findViewById(R.id.textView2)).setText("ijidjs");
         return rootView;

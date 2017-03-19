@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -16,17 +13,12 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.julimi.where_to_study.dummy.DummyContent;
+import com.example.julimi.where_to_study.dummy.Model;
 
-import java.io.IOException;
-
-import static android.support.v4.app.NavUtils.navigateUpFromSameTask;
-
-public class MainActivity extends AppCompatActivity {
+public class BuildingListView extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         //    public void onClick(View view) {
         //        Context context = view.getContext();
-        //        Intent intent = new Intent(context, ItemListActivity.class);
+        //        Intent intent = new Intent(context, RoomListView.class);
                 //intent.putExtra(itemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
 
             //    context.startActivity(intent);
@@ -98,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
 
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.fakebuildinglist));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Model.fakebuildinglist));
     }
 
     public class SimpleItemRecyclerViewAdapter
@@ -139,12 +131,12 @@ public class MainActivity extends AppCompatActivity {
                          //       .commit();
                     } else {
                         Context context = v.getContext();
-                        Intent intent = new Intent(context, ItemListActivity.class);
+                        Intent intent = new Intent(context, RoomListView.class);
                         System.out.println("WAHAHA");
 
-                        ItemListActivity.setBN(mValues[position]);
-                        //DummyContent.helpToLoad();
-                        //intent.putExtra(ItemListActivity.BUILDING_NAME, mValues[position]);
+                        RoomListView.setBN(mValues[position]);
+                        //Model.helpToLoad();
+                        //intent.putExtra(RoomListView.BUILDING_NAME, mValues[position]);
 
                         context.startActivity(intent);
                     }
@@ -160,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mNameView;
-            //public DummyContent.DummyItem mItem;
+            //public Model.DummyItem mItem;
 
             public ViewHolder(View view) {
                 super(view);
