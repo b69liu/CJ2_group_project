@@ -15,10 +15,36 @@ import android.view.View;
 import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.example.julimi.where_to_study.dummy.Model;
+import android.provider.Settings.Secure;
 
-public class BuildingListView extends AppCompatActivity {
+public class BuildingListView extends AppCompatActivity  {
+
+
+
+    public class BackgroundThread extends Thread {
+
+        public BackgroundThread (){}
+        private String android_id = Secure.getString(BuildingListView.this.getContentResolver(),
+                Secure.ANDROID_ID);
+
+        @Override
+        public void run() {
+            while(true){
+                System.out.println("send MAC");
+
+                System.out.println(android_id);
+                try {
+                    Thread.sleep(2000);
+                }catch (InterruptedException e) {
+
+                }
+            }
+        }
+    }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -32,6 +58,11 @@ public class BuildingListView extends AppCompatActivity {
         searchView.setSubmitButtonEnabled(true);
         searchView.setQueryRefinementEnabled(true);
         searchView.setIconifiedByDefault(false);
+
+        //Thread thread = new Thread(this);
+        //thread.start();
+        BackgroundThread bt=new BackgroundThread();
+        bt.start();
         return true;
     }
 
