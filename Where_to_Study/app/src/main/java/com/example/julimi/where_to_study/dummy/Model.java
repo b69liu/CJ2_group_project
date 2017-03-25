@@ -219,35 +219,34 @@ public class Model {
 
 
         try {
-            System.out.println("Enter !!!");
+            //System.out.println("Enter !!!");
             Date min = format.parse(Min);
             curdate = format.parse(curTime);
             Date thedate = new Date();
 
             for (int i = 0; i < noc; i++) {
                 boolean b4 = helpToGetFile(dw, oj.getJSONObject(i).getString("weekdays"));
-                System.out.println(i);
+                //System.out.println(i);
                 if (!b4) continue;
 
 
                 // store schedule
                 String st = oj.getJSONObject(i).getString("start_time");
                 String et = oj.getJSONObject(i).getString("end_time");
-                System.out.println("shit !");
+                //System.out.println("shit !");
                 String fix = "8:00";
                 Date dfix = format.parse(fix);
                 Date dst = format.parse(st);
                 Date det = format.parse(et);
-                System.out.println("shit !!");
+                //System.out.println("shit !!");
                 long deltaD = dst.getTime() - dfix.getTime();
                 int timeSlotIndex1 = ((int) TimeUnit.MILLISECONDS.toMinutes(deltaD)) / 30;
-                System.out.println("deltaD: " + deltaD);
-                System.out.println("shit !!!");
+                //System.out.println("deltaD: " + deltaD);
+
                 deltaD = det.getTime() - dfix.getTime();
                 int timeSlotIndex2 = ((int) TimeUnit.MILLISECONDS.toMinutes(deltaD)) / 30;
                 int doTSI = timeSlotIndex2 - timeSlotIndex1;
 
-                System.out.println("shit !!!!");
                 for (int k = 1; k < doTSI; k++) {
                     inDetail[k+timeSlotIndex1] = "paint";
                 }
@@ -268,7 +267,7 @@ public class Model {
 
             }
             String test = format.format(min).toString();
-            System.out.println("Out !!!!");
+            //System.out.println("Out !!!!");
             boolean b5 = test.equals(Min);
             if (b5) {
 
@@ -555,7 +554,7 @@ public class Model {
                 String key = (String) it.next();
                 //System.out.println("Paracmeter: " + COUNT);
 
-                System.out.println(key);
+                //System.out.println(key);
                 String[] inDetail = new String[31];
                 System.out.println(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length());
                 String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length(), inDetail);
@@ -581,6 +580,7 @@ public class Model {
     //}
 
     private static void addItem(DummyItem item) {
+        System.out.println("Check null: " + item.content);
         ITEMS.add(item);
         ITEM_MAP.put(item.id, item);
     }

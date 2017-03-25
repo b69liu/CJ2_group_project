@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.example.julimi.where_to_study.dummy.Model;
 
+import java.util.Map;
+
 /**
  * A fragment representing a single Item detail screen.
  * This fragment is either contained in a {@link RoomListView}
@@ -78,7 +80,10 @@ public class RoomDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = Model.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            System.out.println("ARG_ITEM_ID: " + ARG_ITEM_ID + " " + getArguments().getString(ARG_ITEM_ID));
+            Map<String, Model.DummyItem> temp = Model.ITEM_MAP;
+            mItem = temp.get(getArguments().getString(ARG_ITEM_ID));
+            System.out.println("ARG_ITEM: " + " " + Model.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID)).id);
 
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);

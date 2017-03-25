@@ -52,6 +52,7 @@ public class RoomDetailView extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putString(RoomDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(RoomDetailFragment.ARG_ITEM_ID));
+
             RoomDetailFragment fragment = new RoomDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

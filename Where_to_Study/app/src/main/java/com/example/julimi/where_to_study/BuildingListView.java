@@ -31,9 +31,9 @@ public class BuildingListView extends AppCompatActivity  {
         @Override
         public void run() {
             while(true){
-                System.out.println("send MAC");
+                //System.out.println("send MAC");
 
-                System.out.println(android_id);
+                //System.out.println(android_id);
                 try {
                     Thread.sleep(2000);
                 }catch (InterruptedException e) {

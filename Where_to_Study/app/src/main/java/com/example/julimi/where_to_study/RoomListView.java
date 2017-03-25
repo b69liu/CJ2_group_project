@@ -36,6 +36,8 @@ import com.example.julimi.where_to_study.dummy.Model;
 
 import java.util.List;
 
+import static com.example.julimi.where_to_study.dummy.Model.ITEM_MAP;
+
 /**
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -51,6 +53,7 @@ public class RoomListView extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
+    private boolean isRefresh;
 
     public static String BUILDING_NAME = "item_id";
 
@@ -80,13 +83,16 @@ public class RoomListView extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        Model.ITEMS.clear();
-        Model.ITEM_MAP.clear();
+        if (!isRefresh) {
+            Model.ITEMS.clear();
+            Model.ITEM_MAP.clear();
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isRefresh = false;
         setContentView(R.layout.activity_item_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar1);
@@ -127,12 +133,14 @@ public class RoomListView extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 Model.setBuilding(BUILDING_NAME);
                 System.out.println("RI NI MA GOU " + BUILDING_NAME);
-                Model.helpToLoad();
-
-                assert recyclerView != null;
-                setupRecyclerView((RecyclerView) recyclerView);
+                //Model.helpToLoad();
+                //System.out.println("Boolean1: " + ITEM_MAP.get("1").content);
+                //assert recyclerView != null;
+                //setupRecyclerView((RecyclerView) recyclerView);
+                isRefresh = true;
                 startActivity(getIntent());
                 swipeRefreshLayout.setRefreshing(false);
+                //System.out.println("Boolean2: " + ITEM_MAP.get("1").content);
             }
         });
 
@@ -173,7 +181,7 @@ public class RoomListView extends AppCompatActivity {
         });
 
 
-
+        //System.out.println("Boolean3: " + ITEM_MAP.get("1").content);
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
@@ -255,6 +263,7 @@ public class RoomListView extends AppCompatActivity {
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //System.out.println("Boolean4: " + mTwoPane );
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
                         arguments.putString(RoomDetailFragment.ARG_ITEM_ID, holder.mItem.id);
