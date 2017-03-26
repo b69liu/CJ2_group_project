@@ -3,12 +3,19 @@ package com.example.julimi.where_to_study;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -17,6 +24,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.example.julimi.where_to_study.dummy.Model;
 import android.provider.Settings.Secure;
+
+import org.json.JSONException;
+
+import java.io.IOException;
 
 public class BuildingListView extends AppCompatActivity  {
 
@@ -31,8 +42,24 @@ public class BuildingListView extends AppCompatActivity  {
         @Override
         public void run() {
             while(true){
-                //System.out.println("send MAC");
+                String MACadd= getCurrentSsid(BuildingListView.this);
+                if(MACadd != null) {                  //if no wifi connection, not checking
+                   MACadd = MACadd.replaceAll(":","");
+                   MACadd = MACadd.toUpperCase();
+                   String croom = "0";
 
+                   try {
+                       croom  = Model.jsontranlator.getString(MACadd);
+                   }catch (JSONException je){
+                       System.out.print("fail to check jsontranslate in run");
+                   }
+                   String[] parts = croom.split("-");
+                   if(parts.length >= 2){
+                       croom = parts[0] + parts[1];
+                   }
+
+                       System.out.println("send MAC: " + croom);
+                }
                 //System.out.println(android_id);
                 try {
                     Thread.sleep(2000);
@@ -44,7 +71,23 @@ public class BuildingListView extends AppCompatActivity  {
     }
 
 
-
+    public static String getCurrentSsid(Context context) {
+        String ssid = null;
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (networkInfo.isConnected()) {
+            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+            if (connectionInfo != null && !TextUtils.isEmpty(connectionInfo.getSSID())) {
+                //ssid = connectionInfo.getSSID(); // "eduroam"
+                ssid = connectionInfo.getBSSID(); // "d8:c7:c8:17:0a:98"
+                //ssid = connectionInfo.getMacAddress(); // "f8:a9:d0:4f:cc:5d"
+                //ssid = Integer.toString(connectionInfo.getNetworkId()); // 5
+                //ssid = Integer.toString(connectionInfo.getIpAddress());  // 374084618
+            }
+        }
+        return ssid;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -107,6 +150,13 @@ public class BuildingListView extends AppCompatActivity  {
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+
+        try {
+            Model.TranslatefileGet();
+
+        }catch (IOException ioe){
+            System.out.print("fail to call model.translatefileget in buildinglist");
+        }
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the

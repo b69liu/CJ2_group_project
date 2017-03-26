@@ -173,6 +173,7 @@ public class Model {
     //private static String[] output;
 
     public static JSONObject jsonObject = new JSONObject();
+    public static JSONObject jsontranlator = new JSONObject();  //map MAC to room name
     public static StringBuilder responseStrBuilder;
 
 
@@ -330,6 +331,37 @@ public class Model {
             System.err.println("Fail to convert to JSONObject by File!");
         }
     }
+
+    /*
+             read the translation file to jsontranlator
+             called in BuildingList onCreate
+    */
+
+    public static void TranslatefileGet() throws IOException {
+        File local = Environment.getExternalStoragePublicDirectory("/buildings/");
+        String GET_TRANS = "ALL_WIFI.txt";
+        File file = new File(local,GET_TRANS);
+
+        System.out.println("translation "+GET_TRANS);
+
+
+        try {
+            //InputStream in = new BufferedInputStream(file.get);
+            BufferedReader streamReader = new BufferedReader(new FileReader(file));
+            responseStrBuilder = new StringBuilder();
+
+            String inStr;
+            while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
+
+            jsontranlator = new JSONObject(responseStrBuilder.toString());
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.err.println("Fail to convert to JSONObject by Trans File!");
+        }
+    }
+
 
     public static String[] roomGet(String building) throws IOException {
 
