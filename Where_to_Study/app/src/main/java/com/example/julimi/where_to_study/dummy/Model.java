@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import android.view.View;
 import android.widget.Toast;
 
-import static java.lang.Math.abs;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -154,6 +153,7 @@ public class Model {
     private static final String GET_URL_POST = "/courses.json?key=2d5402f20d57e1dd104101f9fa7dae27";
     private static final String USER_AGENT = "Marshmallow/6.0";
     private static String GET_FILE = "";
+
     private static String[] DoW = {
             "",
             "",
@@ -167,12 +167,14 @@ public class Model {
     public static void setBuilding(String name) {
         GET_BUILDING = name;
         GET_FILE = name + ".txt";
+
     }
     private static int Len = 0;
     //private static String[] output;
 
     public static JSONObject jsonObject = new JSONObject();
     public static StringBuilder responseStrBuilder;
+
 
     private static boolean helpToGetFile(String today, String cday) {
         // M,W,F
@@ -211,7 +213,7 @@ public class Model {
         int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
         //dayOfWeek = 3;          // test
         for (int i = 0; i < 31; i++) inDetail[i] = "";
-        if (dayOfWeek == 1 || dayOfWeek == 7) return "            available all day";
+        if (dayOfWeek == 1 || dayOfWeek == 7) return "         　  available all day";
 
 
         String dw = DoW[dayOfWeek];
@@ -271,21 +273,22 @@ public class Model {
             boolean b5 = test.equals(Min);
             if (b5) {
 
-                return "            free until tomorrow";
+                return "          " + oj.getJSONObject(0).getString("people") + "  free until tomorrow";
             }
             difference = min.getTime() - curdate.getTime();
+            if (stt) return "         " + oj.getJSONObject(0).getString("people") + "  available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
+            else {
+                //String oo = "            unavailable";
+
+                return "            unavailable";
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        if (stt) return "            available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
-        else {
-            //String oo = "            unavailable";
-
-            return "            unavailable";
-        }
+        return "";
         // show today's class
         //for (int i = 0; i < jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").length(); i++) {
         //    if (helpToGetFile(DoW[dayOfWeek], jsonObject.getJSONObject("building").getJSONObject("MC").getJSONArray("2034").getJSONObject(i).getString("weekdays")))
@@ -390,9 +393,12 @@ public class Model {
             String inStr;
             while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
 
-            jsonObject = new JSONObject(responseStrBuilder.toString());
+
+                jsonObject = new JSONObject(responseStrBuilder.toString());
+                Len = jsonObject.getJSONArray("data").length();
+
             // Log.d("","JSON value: " + jsonObject.getJSONArray("data").length());
-            Len = jsonObject.getJSONArray("data").length();
+
             in.close();
 
         } catch (JSONException e) {
@@ -402,6 +408,7 @@ public class Model {
             urlConnection.disconnect();
         }
     }
+
 
 
     private static class BackgroundTask extends AsyncTask<String,Void,String> {
@@ -442,6 +449,10 @@ public class Model {
                 System.out.println("enter");
 
                 String GET_URL;
+
+
+
+
                 String []room = roomGet(GET_BUILDING);
                 String content="{\"building\":{\"" + GET_BUILDING + "\":{";
                 int idx = 0;
@@ -481,8 +492,8 @@ public class Model {
                         content = content+ ",\"end_time\":\"";
                         content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("end_time");
                         content += "\"";
-                        content = content+ ",\"room\":\"";
-                        content += jsonObject.getJSONArray("data").getJSONObject(idx).getString("room");
+                        content = content+ ",\"people\":\"";
+                        content += "0";
                         content = content+ "\"}";
                         ++idx;
                         //write
