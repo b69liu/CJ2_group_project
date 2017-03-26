@@ -176,6 +176,9 @@ public class Model {
     public static JSONObject jsontranlator = new JSONObject();  //map MAC to room name
     public static StringBuilder responseStrBuilder;
 
+    //the current room's name
+    //changed in buildinglistview.run
+    public static String currentroom = "0";
 
     private static boolean helpToGetFile(String today, String cday) {
         // M,W,F

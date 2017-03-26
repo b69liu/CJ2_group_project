@@ -50,15 +50,18 @@ public class BuildingListView extends AppCompatActivity  {
 
                    try {
                        croom  = Model.jsontranlator.getString(MACadd);
+                       String[] parts = croom.split("-");
+                       if(parts.length >= 2){
+                           croom = parts[0] + parts[1];
+                       }
+                       Model.currentroom = croom;
                    }catch (JSONException je){
-                       System.out.print("fail to check jsontranslate in run");
-                   }
-                   String[] parts = croom.split("-");
-                   if(parts.length >= 2){
-                       croom = parts[0] + parts[1];
+                       System.out.print("Not in school");
                    }
 
-                       System.out.println("send MAC: " + croom);
+
+
+                       System.out.println("send RoomName: " + croom);
                 }
                 //System.out.println(android_id);
                 try {
