@@ -57,11 +57,14 @@ public class BuildingListView extends AppCompatActivity  {
                        Model.currentroom = croom;
                    }catch (JSONException je){
                        System.out.print("Not in school");
+                       Model.currentroom = "0";       //if not in school, cannot find location
                    }
 
 
 
                        System.out.println("send RoomName: " + croom);
+                }else {
+                   Model.currentroom = "0";             //if wifi off, don't know where we are
                 }
                 //System.out.println(android_id);
                 try {
