@@ -21,6 +21,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
@@ -29,11 +30,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 
 import com.example.julimi.where_to_study.dummy.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.julimi.where_to_study.dummy.Model.ITEM_MAP;
@@ -54,6 +58,8 @@ public class RoomListView extends AppCompatActivity {
      */
     private boolean mTwoPane;
     private boolean isRefresh;
+    private SimpleItemRecyclerViewAdapter adapter;
+    private SearchView sv;
 
     public static String BUILDING_NAME = "item_id";
 
@@ -68,12 +74,23 @@ public class RoomListView extends AppCompatActivity {
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setSubmitButtonEnabled(true);
-        searchView.setQueryRefinementEnabled(true);
-        searchView.setIconifiedByDefault(false);
+        sv = (SearchView) menu.findItem(R.id.search).getActionView();
+        sv.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        sv.setSubmitButtonEnabled(true);
+        //sv.setQueryRefinementEnabled(true);
+        //sv.setIconifiedByDefault(false);
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
 
 
         return true;
@@ -118,6 +135,7 @@ public class RoomListView extends AppCompatActivity {
 
         //Model.getResponse(recyclerView);
         assert recyclerView != null;
+        adapter = new SimpleItemRecyclerViewAdapter(Model.ITEMS);
         setupRecyclerView((RecyclerView) recyclerView);
 
         //System.out.println("WIFI: " + getCurrentSsid(recyclerView.getContext()));
@@ -192,7 +210,7 @@ public class RoomListView extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Model.ITEMS));
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -232,12 +250,17 @@ public class RoomListView extends AppCompatActivity {
     }
 
     public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> implements Filterable {
 
         private final List<Model.DummyItem> mValues;
+        private ArrayList<Model.DummyItem> nmValues,filterList;
+        CustomFilter filter;
 
         public SimpleItemRecyclerViewAdapter(List<Model.DummyItem> items) {
+
             mValues = items;
+            nmValues = new ArrayList<Model.DummyItem>(mValues);
+            filterList = nmValues;
         }
 
         @Override
@@ -250,11 +273,12 @@ public class RoomListView extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mItem = mValues.get(position);
+            holder.mItem = nmValues.get(position);
             //holder.mIdView.setText(mValues.get(position).id);
 
-            holder.mContentView.setText(mValues.get(position).content);
-            if (mValues.get(position).content.length() <= 32) {
+            holder.mContentView.setText(nmValues.get(position).content);
+            System.out.println("Content: " + nmValues.get(position).content);
+            if (nmValues.get(position).content.length() <= 32) {
                 holder.mContentView.setTextColor(Color.RED);
             } else {
                 holder.mContentView.setTextColor(Color.parseColor("#228B22"));
@@ -286,7 +310,18 @@ public class RoomListView extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return mValues.size();
+            return nmValues.size();
+        }
+
+        @Override
+        public Filter getFilter() {
+            if(filter==null)
+            {
+                System.out.println("Jin lai le");
+                System.out.println("Adapter: " + filterList.get(0));
+                filter=new CustomFilter(filterList,SimpleItemRecyclerViewAdapter.this);
+            }
+            return filter;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -305,6 +340,56 @@ public class RoomListView extends AppCompatActivity {
             @Override
             public String toString() {
                 return super.toString() + " '" + mContentView.getText() + "'";
+            }
+        }
+
+        // help to filter
+        public class CustomFilter extends Filter {
+            SimpleItemRecyclerViewAdapter adapte;
+            ArrayList<Model.DummyItem> filterList;
+            public CustomFilter(ArrayList<Model.DummyItem> filterList,SimpleItemRecyclerViewAdapter adapter)
+            {
+                CustomFilter.this.adapte=adapter;
+                CustomFilter.this.filterList=filterList;
+            }
+            //FILTERING OCURS
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results=new FilterResults();
+                //CHECK CONSTRAINT VALIDITY
+                if(constraint != null && constraint.length() > 0)
+                {
+                    //CHANGE TO UPPER
+                    constraint=constraint.toString().toUpperCase();
+                    Log.d("", "constraint: " + constraint);
+                    //STORE OUR FILTERED PLAYERS
+                    ArrayList<Model.DummyItem> filteredPlayers=new ArrayList<>();
+                    for (int i=0;i<filterList.size();i++)
+                    {
+                        //CHECK
+                        if(filterList.get(i).content.substring(0,9).contains(constraint))
+                        {
+                            //ADD PLAYER TO FILTERED PLAYERS
+                            System.out.println("You Jin lai le");
+                            filteredPlayers.add(filterList.get(i));
+                        }
+                    }
+                    results.count=filteredPlayers.size();
+                    results.values=filteredPlayers;
+                    System.out.println("filtered value " + results.values);
+                }else
+                {
+                    results.count=filterList.size();
+                    results.values=filterList;
+                }
+                return results;
+            }
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                adapte.nmValues= (ArrayList<Model.DummyItem>) results.values;
+                //adapte.mValues = nmValues.toArray(mValues);
+                //REFRESH
+                adapte.notifyDataSetChanged();
             }
         }
     }

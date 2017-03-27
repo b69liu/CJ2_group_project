@@ -6,10 +6,5 @@
         android:icon="@drawable/ic_search_white_36dp"
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView" />
-    <item android:id="@+id/macaddress"
-        android:title="See the Mac address"
-        android:icon="@drawable/ic_search_white_36dp"
-        app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="android.support.design.widget.FloatingActionButton" />
 
 </menu>

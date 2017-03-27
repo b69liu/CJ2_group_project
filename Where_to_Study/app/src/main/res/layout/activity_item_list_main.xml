@@ -6,7 +6,17 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="com.example.julimi.where_to_study.BuildingListView">
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </android.support.v4.widget.DrawerLayout>
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -31,7 +41,6 @@
 
 
     </android.support.design.widget.AppBarLayout>
-
 
     <FrameLayout
         android:id="@+id/frameLayout"

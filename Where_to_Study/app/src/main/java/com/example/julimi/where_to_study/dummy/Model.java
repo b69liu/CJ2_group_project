@@ -604,6 +604,7 @@ public class Model {
                 String[] inDetail = new String[31];
                 System.out.println(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length());
                 String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length(), inDetail);
+                key = String.format("%1$-5s",key).substring(0,4);
                 key += nkey;
                 System.out.println(key);
                 //Log.d("","inDetail[0]: " + inDetail[0]);

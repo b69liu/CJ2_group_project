@@ -10,29 +10,47 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import com.arlib.floatingsearchview.FloatingSearchView;
+import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
+import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.julimi.where_to_study.dummy.Model;
 import android.provider.Settings.Secure;
 
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class BuildingListView extends AppCompatActivity  {
+public class BuildingListView extends AppCompatActivity implements BaseFragment.BaseExampleFragmentCallbacks  {
 
-
-
+    private final String TAG = "MainActivity";
+    private DrawerLayout mDrawerLayout;
+    private SimpleItemRecyclerViewAdapter adapter;
+    private SearchView sv;
     public class BackgroundThread extends Thread {
 
         public BackgroundThread (){}
@@ -43,6 +61,7 @@ public class BuildingListView extends AppCompatActivity  {
         public void run() {
             while(true){
                 String MACadd= getCurrentSsid(BuildingListView.this);
+                System.out.println(MACadd);
                 if(MACadd != null) {                  //if no wifi connection, not checking
                    MACadd = MACadd.replaceAll(":","");
                    MACadd = MACadd.toUpperCase();
@@ -101,12 +120,27 @@ public class BuildingListView extends AppCompatActivity  {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
 
+        System.out.println("Ni shi shei");
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setSubmitButtonEnabled(true);
-        searchView.setQueryRefinementEnabled(true);
-        searchView.setIconifiedByDefault(false);
+        //SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        sv = (SearchView) menu.findItem(R.id.search).getActionView();
+        sv.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        sv.setSubmitButtonEnabled(true);
+        //sv.setQueryRefinementEnabled(true);
+        //sv.setIconifiedByDefault(false);
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
 
         //Thread thread = new Thread(this);
         //thread.start();
@@ -133,29 +167,60 @@ public class BuildingListView extends AppCompatActivity  {
     private boolean mTwoPane;
 
     @Override
+    public void onAttachSearchViewToDrawer(FloatingSearchView searchView) {
+        searchView.attachNavigationDrawerToMenuButton(mDrawerLayout);
+    }
+
+    @Override
+    public void onBackPressed() {
+        List fragments = getSupportFragmentManager().getFragments();
+        BaseFragment currentFragment = (BaseFragment) fragments.get(fragments.size() - 1);
+
+        if (!currentFragment.onActivityBackPress()) {
+            super.onBackPressed();
+        }
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar0);
         setSupportActionBar(toolbar);
 
-        //FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        //fab.setOnClickListener(new View.OnClickListener() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //ListView listView = (ListView) findViewById(R.id.listView);
+        //ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(Model.fakebuildinglist));
+        /*adapter = new ArrayAdapter<>(
+                BuildingListView.this,
+                android.R.layout.simple_list_item_1,
+                arrayList);*/
 
-        //    public void onClick(View view) {
-        //        Context context = view.getContext();
-        //        Intent intent = new Intent(context, RoomListView.class);
-                //intent.putExtra(itemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+        //listView.setAdapter(adapter);
+        /*getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, new SearchViewFragment()).commit();*/
+        /*FloatingSearchView fsv = (FloatingSearchView) findViewById(R.id.floating_search_view);
+        fsv.setOnBindSuggestionCallback(new SearchSuggestionsAdapter.OnBindSuggestionCallback() {
+            @Override
+            public void onBindSuggestion(View suggestionView, ImageView leftIcon, TextView textView, SearchSuggestion item, int itemPosition) {
 
-            //    context.startActivity(intent);
-          //  }
-        //});
-        // Show the Up button in the action bar.
+                //here you can set some attributes for the suggestion's left icon and text. For example,
+                //you can choose your favorite image-loading library for setting the left icon's image.
+            }
 
+        });*/
+        //getSupportFragmentManager()
+        //        .beginTransaction()
+        //        .replace(R.id.fragment_container, new SearchViewFragment()).commit();
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
+        //((RecyclerView)recyclerView).setLayoutManager(new LinearLayoutManager(this));
+        ((RecyclerView)recyclerView).setItemAnimator(new DefaultItemAnimator());
+        adapter = new SimpleItemRecyclerViewAdapter(Model.fakebuildinglist);
         setupRecyclerView((RecyclerView) recyclerView);
+        System.out.println("Ni ma!");
+        //sv = (SearchView) findViewById(R.id.search);
 
         try {
             Model.TranslatefileGet();
@@ -177,16 +242,26 @@ public class BuildingListView extends AppCompatActivity  {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
 
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Model.fakebuildinglist));
+        recyclerView.setAdapter(adapter);
     }
 
     public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> implements Filterable {
 
-        private final String[] mValues;
+        private String[] mValues;
+
+        // new
+        ArrayList<String> nmValues,filterList;
+        CustomFilter filter;
 
         public SimpleItemRecyclerViewAdapter(String[] items) {
+
             mValues = items;
+
+            //new
+            nmValues = new ArrayList<String>(Arrays.asList(mValues));
+            //System.out.println("Adapter: " + nmValues.get(0));
+            filterList = nmValues;
         }
 
         @Override
@@ -199,7 +274,7 @@ public class BuildingListView extends AppCompatActivity  {
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
             //holder.mItem = mValues[position];
-            holder.mNameView.setText(mValues[position] + "                    ");
+            holder.mNameView.setText(nmValues.get(position) + "                    ");
 
 
             //holder.mContentView.setText(mValues.get(position).content);
@@ -221,7 +296,7 @@ public class BuildingListView extends AppCompatActivity  {
                         Intent intent = new Intent(context, RoomListView.class);
                         System.out.println("WAHAHA");
 
-                        RoomListView.setBN(mValues[position]);
+                        RoomListView.setBN(nmValues.get(position));
                         //Model.helpToLoad();
                         //intent.putExtra(RoomListView.BUILDING_NAME, mValues[position]);
 
@@ -233,7 +308,18 @@ public class BuildingListView extends AppCompatActivity  {
 
         @Override
         public int getItemCount() {
-            return mValues.length;
+            return nmValues.size();
+        }
+
+        @Override
+        public Filter getFilter() {
+            if(filter==null)
+            {
+                System.out.println("Jin lai le");
+                System.out.println("Adapter: " + filterList.get(0));
+                filter=new CustomFilter(filterList,SimpleItemRecyclerViewAdapter.this);
+            }
+            return filter;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -248,6 +334,56 @@ public class BuildingListView extends AppCompatActivity  {
             }
 
 
+        }
+
+        // help to filter
+        public class CustomFilter extends Filter {
+            SimpleItemRecyclerViewAdapter adapte;
+            ArrayList<String> filterList;
+            public CustomFilter(ArrayList<String> filterList,SimpleItemRecyclerViewAdapter adapter)
+            {
+                CustomFilter.this.adapte=adapter;
+                CustomFilter.this.filterList=filterList;
+            }
+            //FILTERING OCURS
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results=new FilterResults();
+                //CHECK CONSTRAINT VALIDITY
+                if(constraint != null && constraint.length() > 0)
+                {
+                    //CHANGE TO UPPER
+                    constraint=constraint.toString().toUpperCase();
+                    Log.d("", "constraint: " + constraint);
+                    //STORE OUR FILTERED PLAYERS
+                    ArrayList<String> filteredPlayers=new ArrayList<>();
+                    for (int i=0;i<filterList.size();i++)
+                    {
+                        //CHECK
+                        if(filterList.get(i).toUpperCase().contains(constraint))
+                        {
+                            //ADD PLAYER TO FILTERED PLAYERS
+                            System.out.println("You Jin lai le");
+                            filteredPlayers.add(filterList.get(i));
+                        }
+                    }
+                    results.count=filteredPlayers.size();
+                    results.values=filteredPlayers;
+                    System.out.println("filtered value " + results.values);
+                }else
+                {
+                    results.count=filterList.size();
+                    results.values=filterList;
+                }
+                return results;
+            }
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                adapte.nmValues= (ArrayList<String>) results.values;
+                //adapte.mValues = nmValues.toArray(mValues);
+                //REFRESH
+                adapte.notifyDataSetChanged();
+            }
         }
     }
 }
