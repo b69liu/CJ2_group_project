@@ -174,6 +174,7 @@ public class Model {
 
     public static JSONObject jsonObject = new JSONObject();
     public static JSONObject jsontranlator = new JSONObject();  //map MAC to room name
+    public static JSONObject PeopleMap = new JSONObject();      //map room to num of people
     public static StringBuilder responseStrBuilder;
 
     //the current room's name
@@ -205,8 +206,9 @@ public class Model {
     }
 
 
-    public static String filterByDay(JSONArray oj, int noc, String[] inDetail) {
+    public static String filterByDay(String roomnum,JSONArray oj, int noc, String[] inDetail) {
 
+        String np = "0"; //number of people
         Calendar c = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CANADA);
         Date curdate = new Date();
@@ -220,9 +222,17 @@ public class Model {
         for (int i = 0; i < 31; i++) inDetail[i] = "";
         if (dayOfWeek == 1 || dayOfWeek == 7) return "         　  available all day";
 
-
         String dw = DoW[dayOfWeek];
         long difference = 0;
+
+        //set the np
+        try {
+            np = PeopleMap.get(roomnum).toString();
+            System.out.println("Room [" + roomnum + "] exist and its people is "+ np);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            np = "0";
+        }
 
 
         try {
@@ -278,10 +288,13 @@ public class Model {
             boolean b5 = test.equals(Min);
             if (b5) {
 
-                return "          " + oj.getJSONObject(0).getString("people") + "  free until tomorrow";
+                //return "          " + oj.getJSONObject(0).getString("people") + "  free until tomorrow";
+                return "          " +  np + "  free until tomorrow";
             }
             difference = min.getTime() - curdate.getTime();
-            if (stt) return "         " + oj.getJSONObject(0).getString("people") + "  available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
+            //if (stt) return "         " + oj.getJSONObject(0).getString("people") + "  available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
+            if (stt) return "         " + np + "  available for " + TimeUnit.MILLISECONDS.toMinutes(difference) + "mins";
+
             else {
                 //String oo = "            unavailable";
 
@@ -342,6 +355,7 @@ public class Model {
     */
 
     public static void TranslatefileGet() throws IOException {
+        System.out.println("Reading ALL_WIFI.txt");
         File local = Environment.getExternalStoragePublicDirectory("/buildings/");
         String GET_TRANS = "ALL_WIFI.txt";
         File file = new File(local,GET_TRANS);
@@ -358,12 +372,59 @@ public class Model {
             while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
 
             jsontranlator = new JSONObject(responseStrBuilder.toString());
-
+            System.out.println("jsontranslator created!");
 
         } catch (JSONException e) {
             e.printStackTrace();
             System.err.println("Fail to convert to JSONObject by Trans File!");
         }
+    }
+
+
+    /*
+    /     renew the PeopleMap from server,
+    /      which containing a map from rooms in builing to number of people(return size of jsonmap)
+    */
+    public static int SetPeople(String building) throws IOException {
+
+        String url = "http://54.88.214.21/rooms.php/" + building;
+        URL obj = new URL(url);
+        HttpURLConnection urlConnection = (HttpURLConnection) obj.openConnection();
+        System.out.println("!!!!!!!");
+
+        urlConnection.setRequestMethod("GET");
+        //urlConnection.setRequestProperty("User_Agent", USER_AGENT);
+        //int response = urlConnection.getResponseCode();
+
+
+        System.out.println("hahaha");
+        try {
+            urlConnection.connect();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            responseStrBuilder = new StringBuilder();
+
+            String inStr;
+            while ((inStr = streamReader.readLine()) != null) responseStrBuilder.append(inStr);
+            //JSONArray bArray = new JSONArray(responseStrBuilder.toString());
+            JSONArray bArray = new JSONArray(responseStrBuilder.toString());
+            //renew PeopleMap
+            PeopleMap = new JSONObject();
+
+            for (int i = 0; i < bArray.length(); i++) {
+                PeopleMap.put(bArray.getJSONObject(i).getString("room"),bArray.getJSONObject(i).getString("num_user"));
+            }
+            // Log.d("","JSON value: " + jsonObject.getJSONArray("data").length());
+            //Len = bObject.getJSONArray("data").length();
+            in.close();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.err.println("Fail to convert to JSONObject! when call SetPeople");
+        } finally {
+            urlConnection.disconnect();
+        }
+        return PeopleMap.length();
     }
 
 
@@ -574,14 +635,87 @@ public class Model {
 
     }
 
+
+    /*
+    /       this is to download PeopleMap
+    */
+    private static class PeopleTask extends AsyncTask<String,Void,String> {
+
+        View view;
+        ProgressDialog pd;
+        String SelectedBuilding = "0";
+        int peoplenum = 0;
+
+        public PeopleTask(String selbuilding) {
+            this.view = null;
+            SelectedBuilding = selbuilding;
+        }
+
+
+        //@Override
+        protected void onProgressUpdate(Integer... values) {
+            //super.onProgressUpdate(values);
+            //if (values.length == 2) {
+            pd.setProgress(values[0]);
+            //   pd.setMax(values[1]);
+            //}
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //pd.setMessage("Refreshing people...");
+           // pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            //pd.show();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                peoplenum = Model.SetPeople(SelectedBuilding);
+                System.out.println("PeopleMap build with "+peoplenum+" people");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Fail to do SetPeople() in background");
+                return "false";
+
+            }
+            //return responseStrBuilder.toString();
+            return "true";
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(view != null) {
+
+                if (pd.isShowing()) pd.dismiss();
+                if (s == "true") {
+                    //Toast.makeText(view.getContext(), "Synch Completed!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(view.getContext(), "Refreshing people Completed! Please Swipe and Refresh", Toast.LENGTH_LONG).show();
+                }
+                else Toast.makeText(view.getContext(), "Error", Toast.LENGTH_LONG).show();
+                //Snackbar.make(view, "Synchronization Completed! Please Swipe and Refresh", Snackbar.LENGTH_LONG).show();
+            }
+        }
+
+    }
+
+
+
     public static void getResponse(View view) {
         new BackgroundTask(view).execute();
     }
     public static void getResponseO() {new BackgroundTask().execute();}
-
+    public static void downloadpeople(String selbuilding) {
+        System.out.println("calling downloadpeople in Model");
+        new PeopleTask(selbuilding).execute();}     //should be called after building selected
 
     public static void helpToLoad() {
         try {
+            downloadpeople(GET_BUILDING);  //update PeopleMap when swap
+            System.out.println("update PeopleMap to " + GET_BUILDING);
             //getResponseO();
             //System.out.println("kkk");
             System.out.println("cao ni ma " + GET_FILE);
@@ -603,10 +737,14 @@ public class Model {
                 //System.out.println(key);
                 String[] inDetail = new String[31];
                 System.out.println(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length());
-                String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length(), inDetail);
+                String nkey = filterByDay(key,jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length(), inDetail);
+
+                //String nkey = filterByDay(jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key), jsonObject.getJSONObject("building").getJSONObject(GET_BUILDING).getJSONArray(key).length(), inDetail);
+                System.out.println("now the room is "+ key);
                 key = String.format("%1$-5s",key).substring(0,4);
                 key += nkey;
-                System.out.println(key);
+                System.out.println("now the nky is"+ nkey);
+
                 //Log.d("","inDetail[0]: " + inDetail[0]);
                 addItem(createDummyItem(i, key, inDetail));
             }

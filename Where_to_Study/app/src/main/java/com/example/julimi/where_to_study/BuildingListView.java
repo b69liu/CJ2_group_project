@@ -71,7 +71,7 @@ public class BuildingListView extends AppCompatActivity  {
         public void run() {
             while(true){
                 String MACadd= getCurrentSsid(BuildingListView.this);
-                //System.out.println(MACadd);
+                System.out.println("just got MACadd");
                 if(MACadd != null) {                  //if no wifi connection, not checking
                    MACadd = MACadd.replaceAll(":","");
                    MACadd = MACadd.toUpperCase();
@@ -81,7 +81,7 @@ public class BuildingListView extends AppCompatActivity  {
                    try {
                        System.out.println("before crom="+Model.jsontranlator.length());
                        croom  = Model.jsontranlator.getString(MACadd);
-                       System.out.println("after crom=");
+
                        String[] parts = croom.split("-");
                        if(parts.length >= 2){
                            croom =  parts[1];
@@ -91,6 +91,7 @@ public class BuildingListView extends AppCompatActivity  {
                        Model.currentroom = croom;
                    }catch (JSONException je){
                        System.out.print("Not in school");
+                       System.out.println("my MAC is "+ MACadd);
                        Model.currentroom = "0";       //if not in school, cannot find location
                    }
 
@@ -108,7 +109,7 @@ public class BuildingListView extends AppCompatActivity  {
                 //System.out.println(android_id);
                 try {
                     LocReport(url);
-                    Thread.sleep(2000);
+                    Thread.sleep(20000);
                 }catch (InterruptedException e) {
 
                 } catch (IOException e) {
@@ -282,6 +283,7 @@ public class BuildingListView extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
+            System.out.println("in Buildinglist onCreate");
             Model.TranslatefileGet();
             Log.d("", "wo ri");
 
@@ -399,6 +401,10 @@ public class BuildingListView extends AppCompatActivity  {
                         RoomListView.setBN(nmValues.get(position));
                         //Model.helpToLoad();
                         //intent.putExtra(RoomListView.BUILDING_NAME, mValues[position]);
+
+                        //get number of people for selected building
+
+                        //Model.downloadpeople(nmValues.get(position));
 
                         context.startActivity(intent);
                     }
