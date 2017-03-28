@@ -7,58 +7,38 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.arlib.floatingsearchview.FloatingSearchView;
-import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
-import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.example.julimi.where_to_study.dummy.Model;
 import android.provider.Settings.Secure;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class BuildingListView extends AppCompatActivity  {
 
-    private final String TAG = "MainActivity";
-    private DrawerLayout mDrawerLayout;
+
     private SimpleItemRecyclerViewAdapter adapter;
     private SearchView sv;
     public class BackgroundThread extends Thread {
@@ -75,7 +55,11 @@ public class BuildingListView extends AppCompatActivity  {
                 if(MACadd != null) {                  //if no wifi connection, not checking
                    MACadd = MACadd.replaceAll(":","");
                    MACadd = MACadd.toUpperCase();
-                    System.out.println(MACadd);
+
+                    // test in 2038
+                    //MACadd = "D8C7C8189558";
+
+                   System.out.println(MACadd);
                    String croom = "0";
 
                    try {
@@ -109,7 +93,7 @@ public class BuildingListView extends AppCompatActivity  {
                 //System.out.println(android_id);
                 try {
                     LocReport(url);
-                    Thread.sleep(20000);
+                    Thread.sleep(300000);
                 }catch (InterruptedException e) {
 
                 } catch (IOException e) {
@@ -142,70 +126,6 @@ public class BuildingListView extends AppCompatActivity  {
 
     }
 
-
-    private class BKTask extends AsyncTask<String, Void, String> {
-        private String name="";
-        @Override
-        protected String doInBackground(String... urls) {
-            String output = null;
-            for (String url : urls) {
-                output = getOutputFromUrl(url);
-            }
-            return output;
-        }
-
-        private String getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(
-                        new InputStreamReader(stream));
-                String s = "";
-                while ((s = buffer.readLine()) != null)
-                    output.append(s);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return output.toString();
-        }
-
-        // Makes HttpURLConnection and returns InputStream
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-                httpConnection.setDoOutput(true);
-                httpConnection.connect();
-                //post
-
-                OutputStreamWriter writer = new OutputStreamWriter(httpConnection.getOutputStream());
-                String urlParameters = Model.currentroom;
-                writer.write(urlParameters);
-                writer.flush();
-
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-                }
-                writer.close();
-                httpConnection.disconnect();
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return stream;
-        }
-
-        @Override
-        protected void onPostExecute(String output) {
-
-         //   msg.setText(output);
-        }
-    }
 
     public static String getCurrentSsid(Context context) {
         String ssid = null;
@@ -293,32 +213,6 @@ public class BuildingListView extends AppCompatActivity  {
         setContentView(R.layout.activity_item_list_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar0);
         setSupportActionBar(toolbar);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        //ListView listView = (ListView) findViewById(R.id.listView);
-        //ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(Model.fakebuildinglist));
-        /*adapter = new ArrayAdapter<>(
-                BuildingListView.this,
-                android.R.layout.simple_list_item_1,
-                arrayList);*/
-
-        //listView.setAdapter(adapter);
-        /*getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, new SearchViewFragment()).commit();*/
-        /*FloatingSearchView fsv = (FloatingSearchView) findViewById(R.id.floating_search_view);
-        fsv.setOnBindSuggestionCallback(new SearchSuggestionsAdapter.OnBindSuggestionCallback() {
-            @Override
-            public void onBindSuggestion(View suggestionView, ImageView leftIcon, TextView textView, SearchSuggestion item, int itemPosition) {
-
-                //here you can set some attributes for the suggestion's left icon and text. For example,
-                //you can choose your favorite image-loading library for setting the left icon's image.
-            }
-
-        });*/
-        //getSupportFragmentManager()
-        //        .beginTransaction()
-        //        .replace(R.id.fragment_container, new SearchViewFragment()).commit();
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;

@@ -55,8 +55,6 @@ public class Model {
      */
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
 
-    public static final Map<String, Map<String, DummyItem> > Buildings = new HashMap<String, Map<String, DummyItem> >();
-
     public static final String fakebuildinglist[] = {
             "AHS",
             "AL",
@@ -99,8 +97,6 @@ public class Model {
             "STC",
             "STP"};
 
-
-    public static boolean isDownload = false;
 
     public static void writeToFile(String data,String filename)
     {
@@ -514,7 +510,7 @@ public class Model {
         ProgressDialog pd;
 
 
-        public BackgroundTask() {this.view = null;}
+        //public BackgroundTask() {this.view = null;}
         public BackgroundTask(View view) {
 
             this.view = view;
@@ -641,32 +637,12 @@ public class Model {
     */
     private static class PeopleTask extends AsyncTask<String,Void,String> {
 
-        View view;
-        ProgressDialog pd;
         String SelectedBuilding = "0";
         int peoplenum = 0;
 
         public PeopleTask(String selbuilding) {
-            this.view = null;
+
             SelectedBuilding = selbuilding;
-        }
-
-
-        //@Override
-        protected void onProgressUpdate(Integer... values) {
-            //super.onProgressUpdate(values);
-            //if (values.length == 2) {
-            pd.setProgress(values[0]);
-            //   pd.setMax(values[1]);
-            //}
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //pd.setMessage("Refreshing people...");
-           // pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            //pd.show();
         }
 
         @Override
@@ -688,16 +664,7 @@ public class Model {
 
         @Override
         protected void onPostExecute(String s) {
-            if(view != null) {
 
-                if (pd.isShowing()) pd.dismiss();
-                if (s == "true") {
-                    //Toast.makeText(view.getContext(), "Synch Completed!", Toast.LENGTH_LONG).show();
-                    Toast.makeText(view.getContext(), "Refreshing people Completed! Please Swipe and Refresh", Toast.LENGTH_LONG).show();
-                }
-                else Toast.makeText(view.getContext(), "Error", Toast.LENGTH_LONG).show();
-                //Snackbar.make(view, "Synchronization Completed! Please Swipe and Refresh", Snackbar.LENGTH_LONG).show();
-            }
         }
 
     }
@@ -707,7 +674,7 @@ public class Model {
     public static void getResponse(View view) {
         new BackgroundTask(view).execute();
     }
-    public static void getResponseO() {new BackgroundTask().execute();}
+    //public static void getResponseO() {new BackgroundTask().execute();}
     public static void downloadpeople(String selbuilding) {
         System.out.println("calling downloadpeople in Model");
         new PeopleTask(selbuilding).execute();}     //should be called after building selected

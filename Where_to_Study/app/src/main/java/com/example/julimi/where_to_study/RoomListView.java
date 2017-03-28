@@ -40,8 +40,6 @@ import com.example.julimi.where_to_study.dummy.Model;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.julimi.where_to_study.dummy.Model.ITEM_MAP;
-
 /**
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -230,24 +228,6 @@ public class RoomListView extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-    public static String getCurrentSsid(Context context) {
-        String ssid = null;
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo.isConnected()) {
-            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
-            if (connectionInfo != null && !TextUtils.isEmpty(connectionInfo.getSSID())) {
-                //ssid = connectionInfo.getSSID(); // "eduroam"
-                ssid = connectionInfo.getBSSID(); // "d8:c7:c8:17:0a:98"
-                //ssid = connectionInfo.getMacAddress(); // "f8:a9:d0:4f:cc:5d"
-                //ssid = Integer.toString(connectionInfo.getNetworkId()); // 5
-                //ssid = Integer.toString(connectionInfo.getIpAddress());  // 374084618
-            }
-        }
-        return ssid;
-    }
 
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> implements Filterable {
