@@ -179,6 +179,7 @@ public class Model {
     //the current room's name
     //changed in buildinglistview.run
     public static String currentroom = "0";
+    public static String currentbuilding = "0";
 
     private static boolean helpToGetFile(String today, String cday) {
         // M,W,F
@@ -484,8 +485,7 @@ public class Model {
                 System.out.println("enter");
 
                 String GET_URL;
-
-
+                
 
 
                 String []room = roomGet(GET_BUILDING);

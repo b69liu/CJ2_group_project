@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -39,13 +40,22 @@ import com.example.julimi.where_to_study.dummy.Model;
 import android.provider.Settings.Secure;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BuildingListView extends AppCompatActivity implements BaseFragment.BaseExampleFragmentCallbacks  {
+public class BuildingListView extends AppCompatActivity  {
 
     private final String TAG = "MainActivity";
     private DrawerLayout mDrawerLayout;
@@ -61,18 +71,23 @@ public class BuildingListView extends AppCompatActivity implements BaseFragment.
         public void run() {
             while(true){
                 String MACadd= getCurrentSsid(BuildingListView.this);
-                System.out.println(MACadd);
+                //System.out.println(MACadd);
                 if(MACadd != null) {                  //if no wifi connection, not checking
                    MACadd = MACadd.replaceAll(":","");
                    MACadd = MACadd.toUpperCase();
+                    System.out.println(MACadd);
                    String croom = "0";
 
                    try {
+                       System.out.println("before crom="+Model.jsontranlator.length());
                        croom  = Model.jsontranlator.getString(MACadd);
+                       System.out.println("after crom=");
                        String[] parts = croom.split("-");
                        if(parts.length >= 2){
-                           croom = parts[0] + parts[1];
+                           croom =  parts[1];
+                           Model.currentbuilding = parts[0];
                        }
+                       System.out.println(croom);
                        Model.currentroom = croom;
                    }catch (JSONException je){
                        System.out.print("Not in school");
@@ -85,16 +100,111 @@ public class BuildingListView extends AppCompatActivity implements BaseFragment.
                 }else {
                    Model.currentroom = "0";             //if wifi off, don't know where we are
                 }
+
+
+                String url = "http://54.88.214.21/rooms.php/"+ Model.currentbuilding+"/"
+                        + Model.currentroom;
+                Log.d("","curURL: " + url);
                 //System.out.println(android_id);
                 try {
+                    LocReport(url);
                     Thread.sleep(2000);
                 }catch (InterruptedException e) {
+
+                } catch (IOException e) {
 
                 }
             }
         }
     }
 
+
+    //helpter to send message to server
+    public static void LocReport(String GET_URL) throws IOException {
+        URL obj = new URL(GET_URL);
+
+        // obtain a new connection
+        HttpURLConnection urlConnection = (HttpURLConnection) obj.openConnection();
+
+        // prepare the request
+        urlConnection.setRequestMethod("PUT");
+        urlConnection.setRequestProperty("User_Agent", "Marshmallow/6.0");
+        int response = urlConnection.getResponseCode();
+        //System.out.println("Connection Response Code: " + response);
+
+        // read the request
+
+            urlConnection.connect();
+
+            Log.d("","Connection Code: " + response);
+            urlConnection.disconnect();
+
+    }
+
+
+    private class BKTask extends AsyncTask<String, Void, String> {
+        private String name="";
+        @Override
+        protected String doInBackground(String... urls) {
+            String output = null;
+            for (String url : urls) {
+                output = getOutputFromUrl(url);
+            }
+            return output;
+        }
+
+        private String getOutputFromUrl(String url) {
+            StringBuffer output = new StringBuffer("");
+            try {
+                InputStream stream = getHttpConnection(url);
+                BufferedReader buffer = new BufferedReader(
+                        new InputStreamReader(stream));
+                String s = "";
+                while ((s = buffer.readLine()) != null)
+                    output.append(s);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return output.toString();
+        }
+
+        // Makes HttpURLConnection and returns InputStream
+        private InputStream getHttpConnection(String urlString)
+                throws IOException {
+            InputStream stream = null;
+            URL url = new URL(urlString);
+            URLConnection connection = url.openConnection();
+
+            try {
+                HttpURLConnection httpConnection = (HttpURLConnection) connection;
+                httpConnection.setRequestMethod("POST");
+                httpConnection.setDoOutput(true);
+                httpConnection.connect();
+                //post
+
+                OutputStreamWriter writer = new OutputStreamWriter(httpConnection.getOutputStream());
+                String urlParameters = Model.currentroom;
+                writer.write(urlParameters);
+                writer.flush();
+
+                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    stream = httpConnection.getInputStream();
+                }
+                writer.close();
+                httpConnection.disconnect();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return stream;
+        }
+
+        @Override
+        protected void onPostExecute(String output) {
+
+         //   msg.setText(output);
+        }
+    }
 
     public static String getCurrentSsid(Context context) {
         String ssid = null;
@@ -166,23 +276,18 @@ public class BuildingListView extends AppCompatActivity implements BaseFragment.
 */
     private boolean mTwoPane;
 
-    @Override
-    public void onAttachSearchViewToDrawer(FloatingSearchView searchView) {
-        searchView.attachNavigationDrawerToMenuButton(mDrawerLayout);
-    }
 
-    @Override
-    public void onBackPressed() {
-        List fragments = getSupportFragmentManager().getFragments();
-        BaseFragment currentFragment = (BaseFragment) fragments.get(fragments.size() - 1);
 
-        if (!currentFragment.onActivityBackPress()) {
-            super.onBackPressed();
-        }
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            Model.TranslatefileGet();
+            Log.d("", "wo ri");
+
+        }catch (IOException ioe){
+            System.out.print("fail to call model.translatefileget in buildinglist");
+        }
         setContentView(R.layout.activity_item_list_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar0);
         setSupportActionBar(toolbar);
@@ -222,12 +327,7 @@ public class BuildingListView extends AppCompatActivity implements BaseFragment.
         System.out.println("Ni ma!");
         //sv = (SearchView) findViewById(R.id.search);
 
-        try {
-            Model.TranslatefileGet();
 
-        }catch (IOException ioe){
-            System.out.print("fail to call model.translatefileget in buildinglist");
-        }
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
