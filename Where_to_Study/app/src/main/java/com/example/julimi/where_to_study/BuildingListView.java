@@ -57,7 +57,7 @@ public class BuildingListView extends AppCompatActivity  {
                    MACadd = MACadd.toUpperCase();
 
                     // test in 2038
-                    //MACadd = "D8C7C8189558";
+                    //MACadd = "D8C7C8170AA8";
 
                    System.out.println(MACadd);
                    String croom = "0";
@@ -204,7 +204,7 @@ public class BuildingListView extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         try {
             System.out.println("in Buildinglist onCreate");
-            Model.TranslatefileGet();
+            Model.TranslatefileGet(getBaseContext());
             Log.d("", "wo ri");
 
         }catch (IOException ioe){

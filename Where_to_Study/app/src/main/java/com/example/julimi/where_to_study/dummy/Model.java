@@ -1,6 +1,7 @@
 package com.example.julimi.where_to_study.dummy;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -350,18 +351,19 @@ public class Model {
              called in BuildingList onCreate
     */
 
-    public static void TranslatefileGet() throws IOException {
+    public static void TranslatefileGet(Context context) throws IOException {
         System.out.println("Reading ALL_WIFI.txt");
         File local = Environment.getExternalStoragePublicDirectory("/buildings/");
         String GET_TRANS = "ALL_WIFI.txt";
-        File file = new File(local,GET_TRANS);
+        //File file = new File(local,GET_TRANS);
 
         System.out.println("translation "+GET_TRANS);
 
 
         try {
             //InputStream in = new BufferedInputStream(file.get);
-            BufferedReader streamReader = new BufferedReader(new FileReader(file));
+            //BufferedReader streamReader = new BufferedReader(new FileReader(file));
+            BufferedReader streamReader = new BufferedReader(new InputStreamReader(context.getAssets().open(GET_TRANS), "UTF-8"));
             responseStrBuilder = new StringBuilder();
 
             String inStr;
